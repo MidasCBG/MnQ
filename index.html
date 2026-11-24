@@ -198,10 +198,10 @@
           </div>
         </button>
 
-        <!-- 기리공작소 v1.1.1 고정 저작권 마크 -->
+        <!-- 기리공작소 v1.1.2 고정 저작권 마크 -->
         <div
           id="author-badge"
-          title="제작: 기리공작소 (Move & Quiz v1.1.1)"
+          title="제작: 기리공작소 (Move & Quiz v1.1.2)"
           class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 select-none"
         >
           <div id="author-avatar-box" class="w-6 h-6 rounded-full bg-white border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
@@ -213,7 +213,7 @@
             />
           </div>
           <span class="text-xs font-extrabold text-slate-700 whitespace-nowrap">기리공작소</span>
-          <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap">v1.1.1</span>
+          <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap">v1.1.2</span>
         </div>
       </div>
 
@@ -2612,7 +2612,7 @@
       unlockGameAudio();
       const url = new URL(window.location.href);
       url.searchParams.set('view', 'student');
-      url.searchParams.set('ui', '1.1.1');
+      url.searchParams.set('ui', '1.1.2');
       const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
       if (!popup) {
         showToast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.', 'warning');
