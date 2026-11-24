@@ -1,0 +1,3151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Move &amp; Quiz · 무브앤퀴즈</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232563eb'/%3E%3Cstop offset='100%25' stop-color='%230ea5e9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='28' fill='url(%23g)'/%3E%3Crect x='14' y='14' width='44' height='92' rx='12' fill='%2338bdf8' fill-opacity='0.28'/%3E%3Crect x='62' y='14' width='44' height='92' rx='12' fill='%23fb7185' fill-opacity='0.28'/%3E%3Ccircle cx='36' cy='34' r='13' fill='%2310b981' stroke='%23ffffff' stroke-width='3'/%3E%3Ccircle cx='36' cy='60' r='10' fill='%23ffffff'/%3E%3Cpath d='M22 94c2-13 9-19 14-19s12 6 14 19' fill='%23ffffff'/%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gowun+Dodum&family=Inter:wght@400;600;700;800;900&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    body.theme-roblox {
+      font-family: 'Jua', 'Inter', sans-serif;
+      background-color: #e0f2fe;
+      color: #0c4a6e;
+    }
+    body.theme-pokemon {
+      font-family: 'Do Hyeon', 'Inter', sans-serif;
+      background-color: #fef2f2;
+      color: #7f1d1d;
+    }
+    body.theme-cyber {
+      font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif;
+      background-color: #090d16;
+      color: #f1f5f9;
+    }
+    /* 사이버 아케이드형 다크 배경 위 밝은 텍스트 가독성 보정 */
+    body.theme-cyber #app-main .text-slate-900 { color: #f8fafc !important; }
+    body.theme-cyber #app-main .text-slate-800 { color: #e2e8f0 !important; }
+    body.theme-cyber #app-main .text-slate-700 { color: #cbd5e1 !important; }
+    body.theme-cyber #app-main .text-slate-600 { color: #94a3b8 !important; }
+    body.theme-cyber #app-main .text-slate-500 { color: #94a3b8 !important; }
+    body.theme-cyber #app-main .text-blue-600 { color: #38bdf8 !important; }
+    body.theme-cyber #app-main .text-purple-600 { color: #c084fc !important; }
+    body.theme-cyber #app-main .text-emerald-600 { color: #34d399 !important; }
+    body.theme-cyber #app-main .text-amber-600 { color: #fbbf24 !important; }
+    body.theme-cyber #app-main .text-rose-600 { color: #fb7185 !important; }
+    /* 밝은 배경 카드·입력창 내부는 어두운 글씨 유지 */
+    body.theme-cyber #app-main .bg-white,
+    body.theme-cyber #app-main select,
+    body.theme-cyber #app-main input,
+    body.theme-cyber #app-main textarea {
+      background-color: #131c31 !important;
+      color: #f8fafc !important;
+      border-color: rgba(56, 189, 248, 0.35) !important;
+    }
+    body.theme-cyber #app-main .bg-slate-50,
+    body.theme-cyber #app-main .bg-slate-100 {
+      background-color: #0f172a !important;
+      color: #e2e8f0 !important;
+      border-color: rgba(56, 189, 248, 0.25) !important;
+    }
+    body.theme-cyber #app-main .bg-amber-50,
+    body.theme-cyber #app-main .bg-amber-100 {
+      background-color: rgba(245, 158, 11, 0.2) !important;
+      color: #fde68a !important;
+      border-color: rgba(251, 191, 36, 0.45) !important;
+    }
+    body.theme-cyber #app-main .bg-emerald-50,
+    body.theme-cyber #app-main .bg-emerald-100 {
+      background-color: rgba(16, 185, 129, 0.2) !important;
+      color: #a7f3d0 !important;
+      border-color: rgba(52, 211, 153, 0.45) !important;
+    }
+    body.theme-cyber #app-main .bg-rose-50,
+    body.theme-cyber #app-main .bg-rose-100 {
+      background-color: rgba(244, 63, 94, 0.2) !important;
+      color: #fecdd3 !important;
+      border-color: rgba(251, 113, 133, 0.45) !important;
+    }
+    body.theme-cyber #app-main .bg-blue-50,
+    body.theme-cyber #app-main .bg-blue-100,
+    body.theme-cyber #app-main .bg-indigo-50,
+    body.theme-cyber #app-main .bg-indigo-100,
+    body.theme-cyber #app-main .bg-purple-50 {
+      background-color: rgba(56, 189, 248, 0.16) !important;
+      color: #bae6fd !important;
+      border-color: rgba(56, 189, 248, 0.4) !important;
+    }
+    /* 단, 밝은 형광/노랑 강조 버튼 위 글씨는 선명한 다크 톤 유지 */
+    body.theme-cyber #app-main .bg-amber-500,
+    body.theme-cyber #app-main .bg-amber-400,
+    body.theme-cyber #app-main .bg-cyan-400 {
+      color: #090d16 !important;
+    }
+    .grid-bg {
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    body.theme-roblox .grid-bg {
+      background-image: radial-gradient(#7dd3fc 1.4px, transparent 1.4px);
+    }
+    body.theme-pokemon .grid-bg {
+      background-image: radial-gradient(#fca5a5 1.2px, transparent 1.2px);
+    }
+    body.theme-cyber .grid-bg {
+      background-image: radial-gradient(#1e293b 1.2px, transparent 1.2px);
+    }
+    @keyframes pulseWarning {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.45; }
+    }
+    .animate-boundary-warn {
+      animation: pulseWarning 0.7s infinite ease-in-out;
+    }
+    @keyframes revivalBannerPop {
+      0% { transform: scale(0.75); opacity: 0; }
+      18% { transform: scale(1.06); opacity: 1; }
+      82% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.04); opacity: 0; }
+    }
+    .animate-revival-overlay {
+      animation: revivalBannerPop 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- 상단 내비게이션 바 -->
+  <header id="main-navbar" class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- 좌측: 서비스 로고 + 기리공작소 저작권 마크 -->
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <button onclick="navigate('home')" class="flex items-center gap-2.5 text-left group">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 via-sky-500 to-indigo-600 p-0.5 shadow-md group-hover:scale-105 transition overflow-hidden shrink-0">
+            <svg viewBox="0 0 120 120" class="w-full h-full rounded-[14px] bg-slate-900" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="mqZoneO" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+                  <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2"/>
+                </linearGradient>
+                <linearGradient id="mqZoneX" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fb7185" stop-opacity="0.42"/>
+                  <stop offset="100%" stop-color="#e11d48" stop-opacity="0.18"/>
+                </linearGradient>
+              </defs>
+              <!-- 교실 O / X 분할 바닥 그리드 -->
+              <rect x="6" y="8" width="52" height="104" rx="12" fill="url(#mqZoneO)"/>
+              <rect x="62" y="8" width="52" height="104" rx="12" fill="url(#mqZoneX)"/>
+              <line x1="60" y1="10" x2="60" y2="110" stroke="#fbbf24" stroke-width="3" stroke-dasharray="5 4"/>
+
+              <!-- 왼쪽 O 구역 학생 + 머리 위 O 공중 뱃지 -->
+              <g transform="translate(32, 0)">
+                <rect x="-15" y="13" width="30" height="20" rx="10" fill="#10b981" stroke="#ffffff" stroke-width="2.2"/>
+                <circle cx="0" cy="23" r="5.5" fill="none" stroke="#ffffff" stroke-width="2.6"/>
+                <line x1="0" y1="33" x2="0" y2="41" stroke="#34d399" stroke-width="2"/>
+                <circle cx="0" cy="52" r="10.5" fill="#fde68a"/>
+                <path d="M-10 50c1-8 6-11 11-11s9 3 10 11c-3-3-7-4-11-4s-7 1-10 4z" fill="#1e293b"/>
+                <path d="M-15 86c2-13 8-19 15-19s13 6 15 19z" fill="#38bdf8"/>
+                <path d="M-12 72l-8-10M12 72l9-9" stroke="#fde68a" stroke-width="4.5" stroke-linecap="round"/>
+              </g>
+
+              <!-- 오른쪽 X 구역 학생 + 머리 위 X 공중 뱃지 -->
+              <g transform="translate(88, 6)">
+                <rect x="-14" y="13" width="28" height="18" rx="9" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+                <path d="M-4 18l8 8M4 18l-8 8" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
+                <line x1="0" y1="31" x2="0" y2="38" stroke="#fb7185" stroke-width="2"/>
+                <circle cx="0" cy="48" r="9.5" fill="#fed7aa"/>
+                <path d="M-9 46c1-7 5-10 9-10s8 3 9 10" fill="#334155"/>
+                <path d="M-13 80c2-12 7-17 13-17s11 5 13 17z" fill="#fb7185"/>
+                <path d="M-10 67l-7 7M10 67l7-8" stroke="#fed7aa" stroke-width="4" stroke-linecap="round"/>
+              </g>
+
+              <!-- 하단 이동 화살표 포인트 -->
+              <path d="M72 98H46m0 0l7-6m-7 6l7 6" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="font-black text-base sm:text-lg leading-none tracking-tight text-slate-900">Move &amp; Quiz</div>
+            <div class="text-[11px] font-bold text-slate-500 mt-0.5">무브앤퀴즈</div>
+          </div>
+        </button>
+
+        <!-- 기리공작소 v1.0.0 고정 저작권 마크 -->
+        <div
+          id="author-badge"
+          title="제작: 기리공작소 (Move & Quiz v1.0.0)"
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 select-none"
+        >
+          <div id="author-avatar-box" class="w-6 h-6 rounded-full bg-white border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
+            <img
+              id="author-logo-img"
+              src="./giri.png"
+              alt="기리공작소"
+              class="w-full h-full object-contain"
+            />
+          </div>
+          <span class="text-xs font-extrabold text-slate-700 whitespace-nowrap">기리공작소</span>
+          <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap">v1.0.0</span>
+        </div>
+      </div>
+
+      <!-- 우측: Google 로그인 & Gemini 사용량 게이지 -->
+      <div id="auth-quota-bar" class="flex items-center gap-2 ml-auto"></div>
+    </div>
+
+    <!-- 메인 메뉴 탭 -->
+    <nav class="max-w-7xl mx-auto px-3 sm:px-6 pb-2.5 flex items-center gap-1.5 overflow-x-auto">
+      <button onclick="navigate('home')" data-nav="home" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">홈</button>
+      <button onclick="navigate('library')" data-nav="library" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">퀴즈 보관함</button>
+      <button onclick="navigate('creator')" data-nav="creator" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">퀴즈 만들기</button>
+      <button onclick="navigate('settings')" data-nav="settings" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">카메라·판정 설정</button>
+      <button onclick="openStudentWindow()" class="ml-auto px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold whitespace-nowrap shadow-sm transition">
+        학생용 화면 열기
+      </button>
+    </nav>
+  </header>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <main id="app-main" class="flex-1 grid-bg"></main>
+
+  <!-- 토스트 알림 컨테이너 -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 모달 컨테이너 -->
+  <div id="modal-root"></div>
+
+  <script>
+    // ==========================================
+    // 1. 전역 상태 관리
+    // ==========================================
+    const GRADE_LIST = [
+      '초등 1학년', '초등 2학년', '초등 3학년',
+      '초등 4학년', '초등 5학년', '초등 6학년',
+      '중등·일반'
+    ];
+
+    const CATEGORY_GROUPS = {
+      general: [
+        '시사 상식', '넌센스', '음식', '스포츠',
+        '동물·자연', '세계·문화', '역사·위인', '인체·건강',
+        '우주·환경', '속담·사자성어', '안전·교통', '예술·음악'
+      ],
+      curriculum: ['국어', '수학', '사회', '과학', '영어', '예술·체육']
+    };
+
+    const SAMPLE_QUIZZES = [
+      {
+        id: 'quiz_sample_1',
+        isSample: true,
+        title: '[체험용 샘플] 기본 상식·교과 맛보기 퀴즈',
+        grade: '전학년 체험',
+        categories: ['과학', '수학', '시사 상식'],
+        updatedAt: '기본 샘플',
+        syncedDrive: false,
+        driveFolder: '내 드라이브 / MoveAndQuiz_퀴즈보관함',
+        questions: [
+          {
+            id: 'q1',
+            stage: 'main',
+            type: 'OX',
+            question: '자석의 같은 극(N극과 N극)끼리 가까이 대면 서로 밀어낸다.',
+            options: ['O (그렇다)', 'X (아니다)'],
+            answerIndex: 0,
+            explanation: '같은 극끼리는 서로 밀어내고, 다른 극끼리는 서로 끌어당깁니다.'
+          },
+          {
+            id: 'q2',
+            stage: 'main',
+            type: '4CHOICE',
+            question: '종이 없이 암산해 보세요! 사탕 24개를 4명이 똑같이 나누어 가지면 한 명당 몇 개일까요?',
+            options: ['4개', '5개', '6개', '8개'],
+            answerIndex: 2,
+            explanation: '24 ÷ 4 = 6개입니다.'
+          },
+          {
+            id: 'q3',
+            stage: 'revival',
+            type: 'OX',
+            question: '[패자부활전] 우리나라의 전통 음식인 김치는 배추나 무 등을 소금에 절여 양념해 발효시킨 음식이다.',
+            options: ['O (그렇다)', 'X (아니다)'],
+            answerIndex: 0,
+            explanation: '김치는 우리나라를 대표하는 전통 발효 음식입니다.'
+          },
+          {
+            id: 'q4',
+            stage: 'main',
+            type: '4CHOICE',
+            question: '다음 중 액체인 물이 얼어서 고체가 된 상태는 무엇인가요?',
+            options: ['수증기', '얼음', '이슬', '안개'],
+            answerIndex: 1,
+            explanation: '액체인 물이 차가워져 얼면 고체인 얼음이 됩니다.'
+          }
+        ]
+      }
+    ];
+
+    const DEFAULT_USER_PREFS = {
+      theme: 'classic', // 'roblox' | 'pokemon' | 'cyber' | 'classic'
+      targetSurvivors: 1, // 1 | 2 | 3 | 5 | 0 (0 = 전체 문항 완주)
+      allEliminatedRule: 'revive_all', // 'revive_all' | 'void_round' | 'end_game'
+      allEliminatedMsgRevive: '😱 전원 탈락! 모두에게 한 번 더 기회를 드립니다! 전원 부활!',
+      allEliminatedMsgVoid: '⚡ 전원 오답! 이번 문제는 무효 처리하고 직전 인원 그대로 계속합니다!',
+      allEliminatedMsgEnd: '🏁 아쉽게도 전원 탈락하여 퀴즈가 종료되었습니다! 모두 수고했어요!',
+      choice4Layout: 'horizontal', // 'horizontal' (가로 4구역) | 'grid2x2' (2x2 배치)
+      solveTimeSec: 15,
+      countdownSoundStartSec: 5,
+      revealMoveTimeSec: 7,
+      autoAdvance: false,
+      enableRevival: true,
+      soundEnabled: true,
+      mirrorCamera: true,
+      boundaryWidthRatio: 0.035,
+      activeMarginRatio: 0.05,
+      headBadgeOffsetPx: 36,
+      hudOpacity: 0.92,
+      hudX: null,
+      hudY: null
+    };
+
+    const THEME_CONFIGS = {
+      roblox: {
+        id: 'roblox',
+        name: '로블록스 오비형',
+        en: 'Roblox Style',
+        fontName: 'Jua (둥근 블록 게임체)',
+        desc: '블록 스터드 감성과 경쾌한 오비 스테이지 UI',
+        badge: '🟩 OBBY STAGE',
+        stageBgTop: '#0284c7',
+        stageBgBottom: '#0f172a',
+        headerClass: 'bg-sky-100/95 border-sky-300 text-sky-950',
+        panelClass: 'bg-white/95 border-sky-300 text-slate-900',
+        cardClass: 'bg-sky-50 border-sky-400 text-slate-900',
+        accentBtn: 'bg-emerald-500 hover:bg-emerald-600 text-slate-950',
+        zonePalette: ['rgba(34,197,94,0.24)', 'rgba(239,68,68,0.24)', 'rgba(59,130,246,0.24)', 'rgba(250,204,21,0.24)']
+      },
+      pokemon: {
+        id: 'pokemon',
+        name: '포켓몬고 트레이너형',
+        en: 'Pokemon GO',
+        fontName: 'Do Hyeon (역동적 배틀체)',
+        desc: '트레이너 배틀 스타디움 & 몬스터볼 게이지 감성',
+        badge: '🔴 TRAINER ARENA',
+        stageBgTop: '#065f46',
+        stageBgBottom: '#064e3b',
+        headerClass: 'bg-rose-100/95 border-rose-300 text-rose-950',
+        panelClass: 'bg-white/95 border-rose-300 text-slate-900',
+        cardClass: 'bg-rose-50/90 border-rose-400 text-slate-900',
+        accentBtn: 'bg-rose-600 hover:bg-rose-700 text-white',
+        zonePalette: ['rgba(239,68,68,0.22)', 'rgba(59,130,246,0.22)', 'rgba(16,185,129,0.22)', 'rgba(245,158,11,0.22)']
+      },
+      cyber: {
+        id: 'cyber',
+        name: '사이버 아케이드형',
+        en: 'Cyber Arena',
+        fontName: 'Black Han Sans (강렬한 네온체)',
+        desc: '네온 그리드와 미래형 아케이드 e스포츠 연출',
+        badge: '⚡ CYBER ARENA',
+        stageBgTop: '#1e1b4b',
+        stageBgBottom: '#090d16',
+        headerClass: 'bg-slate-900/95 border-cyan-500/40 text-cyan-100',
+        panelClass: 'bg-slate-900/95 border-cyan-500/40 text-slate-100',
+        cardClass: 'bg-indigo-950 text-white border-cyan-400',
+        accentBtn: 'bg-cyan-400 hover:bg-cyan-300 text-slate-950',
+        zonePalette: ['rgba(6,182,212,0.24)', 'rgba(236,72,153,0.24)', 'rgba(139,92,246,0.24)', 'rgba(163,230,53,0.24)']
+      },
+      classic: {
+        id: 'classic',
+        name: '클래식 교실형',
+        en: 'Clean Board',
+        fontName: 'Gowun Dodum (깔끔한 칠판 고딕체)',
+        desc: '눈이 편안하고 가독성이 뛰어난 칠판·화이트보드형',
+        badge: '📘 CLEAN BOARD',
+        stageBgTop: '#1e293b',
+        stageBgBottom: '#0f172a',
+        headerClass: 'bg-white/95 border-slate-200 text-slate-900',
+        panelClass: 'bg-white border-slate-200 text-slate-900',
+        cardClass: 'bg-white border-slate-200 text-slate-900',
+        accentBtn: 'bg-blue-600 hover:bg-blue-700 text-white',
+        zonePalette: ['rgba(59,130,246,0.18)', 'rgba(168,85,247,0.18)', 'rgba(16,185,129,0.18)', 'rgba(245,158,11,0.18)']
+      }
+    };
+
+    const isStudentDisplayMode = new URLSearchParams(window.location.search).get('view') === 'student';
+
+    const state = {
+      route: isStudentDisplayMode ? 'play' : 'home', // 'home' | 'library' | 'creator' | 'settings' | 'play'
+      settingsTab: 'theme', // 'theme' | 'rules' | 'camera'
+      settingsPreviewMode: '4CHOICE', // 'OX' | '4CHOICE'
+      quizzes: [],
+      selectedQuizId: 'quiz_sample_1',
+      editingQuizId: null,
+      auth: {
+        isLoggedIn: false,
+        user: null // { name, email }
+      },
+      quota: {
+        tier: 'free', // 'free' | 'paid'
+        freeDailyLimit: 20,
+        paidDailyLimit: 500,
+        usedToday: 0,
+        history: []
+      },
+      driveBrowser: {
+        selectedFolder: '내 드라이브 / MoveAndQuiz_퀴즈보관함',
+        folders: [
+          '내 드라이브 / MoveAndQuiz_퀴즈보관함',
+          '내 드라이브 / 수업자료 / 초등퀴즈',
+          '내 드라이브 / 학급활동 / 아침퀴즈'
+        ],
+        pendingQuizId: null,
+        mode: 'save' // 'save' | 'load'
+      },
+      activeModal: null, // 'login' | 'quota' | 'drive_picker' | null
+      creator: {
+        mainMode: 'ai', // 'manual' (웹에서 바로 만들기) | 'ai' (AI로 만들기)
+        aiSubMode: 'selected', // 'material' (업로드한 자료 바탕) | 'selected' (선택한 내용으로 바로 만들기)
+        title: '',
+        selectedGrades: ['초등 3학년'], // 다중 선택 가능 (필수)
+        mixAllCategories: false,
+        selectedCategories: ['수학', '과학'], // 다중 선택 가능 (필수)
+        selectedFormats: ['OX', '4CHOICE'], // 'OX' | '4CHOICE' 다중 선택 가능 (필수)
+        customTopic: '',
+        questionCount: 5,
+        isCustomQuestionCount: false,
+        materialFileName: '',
+        materialText: '',
+        isGenerating: false,
+        draftQuestions: []
+      },
+      game: {
+        ...JSON.parse(JSON.stringify(DEFAULT_USER_PREFS)),
+        questionIndex: 0,
+        phase: 'answering', // 'ready' | 'revival_intro' | 'answering' | 'revealed' | 'all_eliminated_alert' | 'finished'
+        paused: false,
+        showLiveSettings: false,
+        timeLeft: 15,
+        revealTimeLeft: 7,
+        timerInterval: null,
+        revivalTimeout: null,
+        specialBannerText: '',
+        specialBannerSub: '',
+        cameraActive: false,
+        videoStream: null,
+        animFrameId: null,
+        faceDetector: null,
+        detectBusy: false,
+        lastDetectAt: 0,
+        detectedHeads: [],
+        participants: [
+          { id: 'p1', label: '학생 1', x: 0.25, y: 0.34, headRadius: 0.045, eliminated: false, status: 'selected', choiceIndex: 0, choiceText: '1번 / O' },
+          { id: 'p2', label: '학생 2', x: 0.50, y: 0.52, headRadius: 0.045, eliminated: false, status: 'boundary', choiceIndex: -1, choiceText: '경계선(미선택)' },
+          { id: 'p3', label: '학생 3', x: 0.76, y: 0.70, headRadius: 0.045, eliminated: false, status: 'selected', choiceIndex: 3, choiceText: '4번 / X' }
+        ]
+      }
+    };
+
+    function applyActiveThemeToDocument() {
+      const themeId = state.game?.theme || 'classic';
+      const theme = THEME_CONFIGS[themeId] || THEME_CONFIGS.classic;
+      document.body.classList.remove('theme-roblox', 'theme-pokemon', 'theme-cyber', 'theme-classic');
+      document.body.classList.add(`theme-${theme.id}`);
+
+      const navbar = document.getElementById('main-navbar');
+      if (navbar) {
+        if (isStudentDisplayMode) {
+          navbar.classList.add('hidden');
+        } else {
+          navbar.className = `sticky top-0 z-40 backdrop-blur border-b shadow-sm transition-colors duration-200 ${theme.headerClass}`;
+        }
+      }
+    }
+
+    function broadcastLiveSyncState() {
+      if (isStudentDisplayMode) return;
+      try {
+        const payload = {
+          ts: Date.now(),
+          selectedQuizId: state.selectedQuizId,
+          quizzes: state.quizzes,
+          game: {
+            theme: state.game.theme,
+            targetSurvivors: state.game.targetSurvivors,
+            choice4Layout: state.game.choice4Layout,
+            solveTimeSec: state.game.solveTimeSec,
+            revealMoveTimeSec: state.game.revealMoveTimeSec,
+            mirrorCamera: state.game.mirrorCamera,
+            boundaryWidthRatio: state.game.boundaryWidthRatio,
+            activeMarginRatio: state.game.activeMarginRatio,
+            headBadgeOffsetPx: state.game.headBadgeOffsetPx,
+            questionIndex: state.game.questionIndex,
+            phase: state.game.phase,
+            paused: state.game.paused,
+            timeLeft: state.game.timeLeft,
+            revealTimeLeft: state.game.revealTimeLeft,
+            specialBannerText: state.game.specialBannerText,
+            specialBannerSub: state.game.specialBannerSub
+          }
+        };
+        localStorage.setItem('mq_live_student_sync', JSON.stringify(payload));
+      } catch (e) {}
+    }
+
+    function syncFromTeacherWindow() {
+      if (!isStudentDisplayMode) return;
+      try {
+        const raw = localStorage.getItem('mq_live_student_sync');
+        if (!raw) return;
+        const payload = JSON.parse(raw);
+        if (payload.quizzes) state.quizzes = payload.quizzes;
+        if (payload.selectedQuizId) state.selectedQuizId = payload.selectedQuizId;
+        if (payload.game) Object.assign(state.game, payload.game);
+        render();
+      } catch (e) {}
+    }
+
+    function updateGamePref(key, value, shouldRender = true) {
+      state.game[key] = value;
+      if (key === 'solveTimeSec' && (state.game.phase === 'ready' || state.game.phase === 'answering')) {
+        state.game.timeLeft = Number(value);
+      }
+      if (key === 'revealMoveTimeSec' && state.game.phase === 'revealed') {
+        state.game.revealTimeLeft = Number(value);
+      }
+      saveUserGamePrefs();
+      broadcastLiveSyncState();
+      if (shouldRender) render();
+    }
+
+    function getUserPrefsStorageKey() {
+      const email = state.auth?.isLoggedIn && state.auth?.user?.email
+        ? state.auth.user.email.toLowerCase().trim()
+        : 'guest_default';
+      return `mq_user_game_prefs_${email}`;
+    }
+
+    function saveUserGamePrefs() {
+      try {
+        const prefsToSave = {};
+        Object.keys(DEFAULT_USER_PREFS).forEach(k => {
+          prefsToSave[k] = state.game[k];
+        });
+        localStorage.setItem(getUserPrefsStorageKey(), JSON.stringify(prefsToSave));
+      } catch (e) {}
+    }
+
+    function loadUserGamePrefs() {
+      try {
+        const raw = localStorage.getItem(getUserPrefsStorageKey());
+        const saved = raw ? JSON.parse(raw) : {};
+        Object.assign(state.game, JSON.parse(JSON.stringify(DEFAULT_USER_PREFS)), saved);
+        state.game.timeLeft = Number(state.game.solveTimeSec) || 15;
+        state.game.revealTimeLeft = Number(state.game.revealMoveTimeSec) || 7;
+      } catch (e) {
+        Object.assign(state.game, JSON.parse(JSON.stringify(DEFAULT_USER_PREFS)));
+      }
+    }
+
+    function loadPersistedData() {
+      try {
+        const savedQuizzes = localStorage.getItem('mq_quizzes_v1');
+        state.quizzes = savedQuizzes ? JSON.parse(savedQuizzes) : JSON.parse(JSON.stringify(SAMPLE_QUIZZES));
+        if (!state.quizzes.length) state.quizzes = JSON.parse(JSON.stringify(SAMPLE_QUIZZES));
+        state.selectedQuizId = state.quizzes[0].id;
+
+        const savedAuth = localStorage.getItem('mq_auth_v1');
+        if (savedAuth) state.auth = JSON.parse(savedAuth);
+
+        const savedQuota = localStorage.getItem('mq_quota_v1');
+        if (savedQuota) Object.assign(state.quota, JSON.parse(savedQuota));
+
+        const savedFolders = localStorage.getItem('mq_drive_folders_v1');
+        if (savedFolders) state.driveBrowser.folders = JSON.parse(savedFolders);
+
+        loadUserGamePrefs();
+      } catch (err) {
+        state.quizzes = JSON.parse(JSON.stringify(SAMPLE_QUIZZES));
+      }
+    }
+
+    function saveQuizzes() {
+      localStorage.setItem('mq_quizzes_v1', JSON.stringify(state.quizzes));
+    }
+
+    function saveAuthState() {
+      localStorage.setItem('mq_auth_v1', JSON.stringify(state.auth));
+    }
+
+    function saveQuotaState() {
+      localStorage.setItem('mq_quota_v1', JSON.stringify(state.quota));
+    }
+
+    function saveDriveFolders() {
+      localStorage.setItem('mq_drive_folders_v1', JSON.stringify(state.driveBrowser.folders));
+    }
+
+    // ==========================================
+    // 3. 공통 유틸 & 토스트 알림
+    // ==========================================
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const colors = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        warning: 'bg-amber-500 text-slate-950 border-amber-400',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-xl text-xs sm:text-sm font-extrabold transition-all duration-300 ${colors[type] || colors.info}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(8px)';
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    function navigate(route) {
+      if ((state.route === 'play' || state.route === 'settings') && route !== state.route) {
+        stopCameraAndTimers();
+      }
+      state.route = route;
+      render();
+      if (route === 'settings' && state.settingsTab === 'camera') {
+        setTimeout(() => initSettingsCameraPreview(), 60);
+      }
+    }
+
+    function switchSettingsTab(tab) {
+      if (state.settingsTab === 'camera' && tab !== 'camera') {
+        stopCameraAndTimers();
+      }
+      state.settingsTab = tab;
+      render();
+      if (tab === 'camera') {
+        setTimeout(() => initSettingsCameraPreview(), 60);
+      }
+    }
+
+    function openModal(modalName) {
+      state.activeModal = modalName;
+      renderModal();
+      if (modalName === 'login') {
+        setTimeout(() => document.getElementById('login-email-input')?.focus(), 50);
+      }
+    }
+
+    function closeModal() {
+      state.activeModal = null;
+      renderModal();
+    }
+
+    // ==========================================
+    // 4. Google 로그인 & 사용량 게이지 로직
+    // ==========================================
+    function detectAccountTierByEmail(email) {
+      const lower = (email || '').toLowerCase();
+      if (lower.includes('pro') || lower.includes('paid') || lower.endsWith('.go.kr') || lower.endsWith('.ac.kr') || lower.endsWith('.edu')) {
+        return 'paid';
+      }
+      return 'free';
+    }
+
+    function completeGoogleLoginAuto() {
+      const emailInput = document.getElementById('login-email-input');
+      const email = emailInput?.value.trim();
+      if (!email || !email.includes('@')) {
+        showToast('올바른 Google 이메일 주소를 입력해 주세요.', 'warning');
+        emailInput?.focus();
+        return;
+      }
+      const derivedName = email.split('@')[0];
+      const detectedTier = detectAccountTierByEmail(email);
+      state.auth.isLoggedIn = true;
+      state.auth.user = { name: derivedName, email };
+      state.quota.tier = detectedTier;
+      saveAuthState();
+      saveQuotaState();
+      loadUserGamePrefs();
+      closeModal();
+      render();
+      showToast(`${email} 로그인 완료 (저장된 개인 설정 및 한도가 자동 적용되었습니다)`, 'success');
+    }
+
+    function logoutGoogleAccount() {
+      state.auth.isLoggedIn = false;
+      state.auth.user = null;
+      saveAuthState();
+      loadUserGamePrefs();
+      closeModal();
+      render();
+      showToast('Google 계정에서 로그아웃되었습니다.', 'info');
+    }
+
+    function getQuotaStats() {
+      const limit = state.quota.tier === 'paid' ? state.quota.paidDailyLimit : state.quota.freeDailyLimit;
+      const used = Math.min(state.quota.usedToday, limit);
+      const remaining = Math.max(0, limit - used);
+      const pctRemaining = Math.round((remaining / limit) * 100);
+      return { limit, used, remaining, pctRemaining };
+    }
+
+    function consumeAiQuota(count, description) {
+      const stats = getQuotaStats();
+      if (stats.remaining <= 0) {
+        showToast('오늘의 Gemini AI 기본 사용량을 모두 소진했습니다.', 'error');
+        openModal('quota');
+        return false;
+      }
+      state.quota.usedToday += 1;
+      state.quota.history.unshift({
+        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+        desc: description,
+        count
+      });
+      if (state.quota.history.length > 20) state.quota.history.pop();
+      saveQuotaState();
+      renderAuthQuotaBar();
+      return true;
+    }
+
+    function renderAuthQuotaBar() {
+      const bar = document.getElementById('auth-quota-bar');
+      if (!bar) return;
+
+      if (!state.auth.isLoggedIn) {
+        bar.innerHTML = `
+          <button onclick="openModal('login')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-sm text-xs sm:text-sm font-extrabold transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
+            <span>Google 로그인</span>
+          </button>
+        `;
+        return;
+      }
+
+      const stats = getQuotaStats();
+      const barColor = stats.pctRemaining > 50 ? 'bg-emerald-500' : stats.pctRemaining > 20 ? 'bg-amber-500' : 'bg-rose-500';
+      const tierBadge = state.quota.tier === 'paid'
+        ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-black">PRO</span>'
+        : '<span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-black">FREE</span>';
+
+      bar.innerHTML = `
+        <!-- Gemini 사용량 게이지 (클릭 시 상세 보기) -->
+        <button onclick="openModal('quota')" title="클릭하여 Gemini AI 사용량 상세 내역 확인" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-left">
+          <div>
+            <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-slate-700">
+              <span>Gemini 잔여</span>
+              ${tierBadge}
+              <span class="text-slate-900">${stats.remaining}/${stats.limit}회</span>
+            </div>
+            <div class="w-28 sm:w-32 h-2 bg-slate-200 rounded-full overflow-hidden mt-1">
+              <div class="h-full ${barColor} transition-all duration-500" style="width: ${stats.pctRemaining}%"></div>
+            </div>
+          </div>
+        </button>
+
+        <!-- 로그인 계정 버튼 -->
+        <button onclick="openModal('login')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 text-xs font-extrabold transition">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black uppercase">
+            ${escapeHtml((state.auth.user?.email || 'G')[0])}
+          </span>
+          <span class="hidden sm:inline max-w-[130px] truncate">${escapeHtml(state.auth.user?.email || '')}</span>
+        </button>
+      `;
+    }
+
+    // ==========================================
+    // 5. Google Drive 폴더 선택 저장 / 불러오기
+    // ==========================================
+    function requestSaveToGoogleDrive(quizId) {
+      if (!state.auth.isLoggedIn) {
+        showToast('Google Drive 저장을 위해 먼저 Google 로그인을 해주세요.', 'warning');
+        openModal('login');
+        return;
+      }
+      state.driveBrowser.pendingQuizId = quizId;
+      state.driveBrowser.mode = 'save';
+      openModal('drive_picker');
+    }
+
+    function requestLoadFromGoogleDrive() {
+      if (!state.auth.isLoggedIn) {
+        showToast('Google Drive 불러오기를 위해 먼저 Google 로그인을 해주세요.', 'warning');
+        openModal('login');
+        return;
+      }
+      state.driveBrowser.mode = 'load';
+      openModal('drive_picker');
+    }
+
+    function createNewDriveFolderOption() {
+      const input = document.getElementById('new-drive-folder-input');
+      const raw = input?.value.trim();
+      if (!raw) return;
+      const fullPath = raw.startsWith('내 드라이브') ? raw : `내 드라이브 / ${raw}`;
+      if (!state.driveBrowser.folders.includes(fullPath)) {
+        state.driveBrowser.folders.push(fullPath);
+        saveDriveFolders();
+      }
+      state.driveBrowser.selectedFolder = fullPath;
+      renderModal();
+      showToast(`'${fullPath}' 폴더가 생성되었습니다.`, 'success');
+    }
+
+    function confirmSaveToSelectedDriveFolder() {
+      const quizId = state.driveBrowser.pendingQuizId;
+      const folder = state.driveBrowser.selectedFolder;
+      const quizObj = state.quizzes.find(q => q.id === quizId);
+      if (!quizObj) return;
+
+      quizObj.syncedDrive = true;
+      quizObj.driveFolder = folder;
+      saveQuizzes();
+
+      const key = 'mq_gdrive_cloud_' + (state.auth.user?.email || 'default');
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const idx = existing.findIndex(item => item.id === quizObj.id);
+      if (idx >= 0) existing[idx] = quizObj;
+      else existing.unshift(quizObj);
+      localStorage.setItem(key, JSON.stringify(existing));
+
+      closeModal();
+      render();
+      showToast(`[${folder}] 위치에 저장되었습니다!`, 'success');
+    }
+
+    function importSingleDriveQuiz(quizId) {
+      const key = 'mq_gdrive_cloud_' + (state.auth.user?.email || 'default');
+      const cloudList = JSON.parse(localStorage.getItem(key) || '[]');
+      const target = cloudList.find(q => q.id === quizId);
+      if (!target) return;
+
+      const existIdx = state.quizzes.findIndex(q => q.id === target.id);
+      if (existIdx >= 0) state.quizzes[existIdx] = target;
+      else state.quizzes.unshift(target);
+
+      state.selectedQuizId = target.id;
+      saveQuizzes();
+      closeModal();
+      render();
+      showToast(`'${target.title}' 퀴즈를 불러왔습니다!`, 'success');
+    }
+
+    // ==========================================
+    // 6. 모달 렌더링 (로그인 / 사용량 상세 / Drive 폴더 선택)
+    // ==========================================
+    function renderModal() {
+      const root = document.getElementById('modal-root');
+      if (!root) return;
+      if (!state.activeModal) {
+        root.innerHTML = '';
+        return;
+      }
+
+      if (state.activeModal === 'login') {
+        root.innerHTML = `
+          <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+            <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="font-black text-lg leading-tight">Google 계정 로그인</h3>
+                    <p class="text-xs text-slate-500">Gemini AI 퀴즈 생성 및 Google Drive 저장 연동</p>
+                  </div>
+                </div>
+                <button onclick="closeModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500 font-bold">✕</button>
+              </div>
+
+              ${state.auth.isLoggedIn ? `
+                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                  <div>
+                    <div class="text-xs font-extrabold text-emerald-700">현재 로그인됨</div>
+                    <div class="text-sm font-black text-slate-900 mt-0.5">${escapeHtml(state.auth.user?.email || '')}</div>
+                  </div>
+                  <button onclick="logoutGoogleAccount()" class="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-extrabold">로그아웃</button>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                  <div>
+                    <span class="text-slate-500 font-bold">계정 등급 자동 확인:</span>
+                    <strong class="ml-1 text-slate-900">${state.quota.tier === 'paid' ? 'PRO 유료 플랜 (일 500회)' : 'FREE 기본 플랜 (일 20회)'}</strong>
+                  </div>
+                  <button onclick="openModal('quota')" class="text-blue-600 font-extrabold underline">사용량 상세</button>
+                </div>
+              ` : `
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <label for="login-email-input" class="text-xs font-extrabold text-slate-700 block">Google 계정 이메일</label>
+                  <input
+                    id="login-email-input"
+                    type="email"
+                    value=""
+                    placeholder="예: teacher@gmail.com"
+                    onkeydown="if(event.key==='Enter') completeGoogleLoginAuto()"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-bold placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p class="text-[11px] text-slate-500 leading-relaxed">
+                    입력한 Google 계정을 바탕으로 무료·유료 Gemini 사용 한도가 자동 설정되며, Google Drive 폴더에 퀴즈를 저장할 수 있습니다.
+                  </p>
+                  <button onclick="completeGoogleLoginAuto()" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition">
+                    <svg class="w-4 h-4 bg-white rounded-full p-0.5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
+                    <span>Google 계정으로 로그인</span>
+                  </button>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      } else if (state.activeModal === 'quota') {
+        const stats = getQuotaStats();
+        const barColor = stats.pctRemaining > 50 ? 'bg-emerald-500' : stats.pctRemaining > 20 ? 'bg-amber-500' : 'bg-rose-500';
+        root.innerHTML = `
+          <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+            <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-black text-lg">Gemini AI 사용량 상세 정보</h3>
+                  <p class="text-xs text-slate-500">${escapeHtml(state.auth.user?.email || '미로그인')}</p>
+                </div>
+                <button onclick="closeModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500 font-bold">✕</button>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div class="flex items-center justify-between text-xs font-extrabold">
+                  <span class="text-slate-600">적용 플랜</span>
+                  <span class="px-2 py-0.5 rounded-lg ${state.quota.tier === 'paid' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}">
+                    ${state.quota.tier === 'paid' ? 'PRO 유료 플랜 (일 500회)' : 'FREE 기본 플랜 (일 20회)'}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between text-sm font-black">
+                  <span>남은 사용 가능량</span>
+                  <span class="text-blue-600">${stats.remaining}회 / ${stats.limit}회 (${stats.pctRemaining}%)</span>
+                </div>
+                <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="h-full ${barColor} transition-all" style="width: ${stats.pctRemaining}%"></div>
+                </div>
+                <div class="text-[11px] text-slate-500">오늘 사용한 횟수: ${stats.used}회 (매일 자정 자동 초기화)</div>
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="text-xs font-extrabold text-slate-700">최근 생성 기록</div>
+                ${state.quota.history.length === 0 ? `
+                  <div class="p-3 rounded-xl bg-slate-50 text-center text-xs text-slate-400">아직 오늘 사용한 기록이 없습니다.</div>
+                ` : `
+                  <div class="max-h-40 overflow-y-auto space-y-1.5">
+                    ${state.quota.history.map(h => `
+                      <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                        <span class="font-bold text-slate-800 truncate pr-2">${escapeHtml(h.desc)}</span>
+                        <span class="text-slate-500 whitespace-nowrap">${h.count}문항 · ${escapeHtml(h.time)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.activeModal === 'drive_picker') {
+        const db = state.driveBrowser;
+        const isSave = db.mode === 'save';
+        const key = 'mq_gdrive_cloud_' + (state.auth.user?.email || 'default');
+        const allSaved = JSON.parse(localStorage.getItem(key) || '[]');
+        const folderItems = allSaved.filter(item => (item.driveFolder || '내 드라이브 / MoveAndQuiz_퀴즈보관함') === db.selectedFolder);
+
+        root.innerHTML = `
+          <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+            <div class="bg-white text-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-black text-lg">Google Drive 폴더 ${isSave ? '위치 선택 및 저장' : '퀴즈 불러오기'}</h3>
+                  <p class="text-xs text-slate-500">${escapeHtml(state.auth.user?.email || '')} 드라이브 공간</p>
+                </div>
+                <button onclick="closeModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500 font-bold">✕</button>
+              </div>
+
+              <div class="space-y-2">
+                <div class="text-xs font-extrabold text-slate-700">저장 위치(폴더) 선택</div>
+                <div class="space-y-1.5 max-h-40 overflow-y-auto">
+                  ${db.folders.map(folder => `
+                    <button onclick="state.driveBrowser.selectedFolder='${escapeHtml(folder)}'; renderModal();" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-bold transition ${db.selectedFolder === folder ? 'bg-blue-50 border-blue-600 text-blue-900' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}">
+                      <span>📁 ${escapeHtml(folder)}</span>
+                      ${db.selectedFolder === folder ? '<span class="text-blue-600 font-black">✓ 선택됨</span>' : ''}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <input id="new-drive-folder-input" type="text" placeholder="새 폴더 이름 입력 (예: 2학기 과학퀴즈)" onkeydown="if(event.key==='Enter') createNewDriveFolderOption()" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold placeholder:font-normal" />
+                <button onclick="createNewDriveFolderOption()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold whitespace-nowrap">+ 새 폴더</button>
+              </div>
+
+              ${isSave ? `
+                <div class="pt-2 flex justify-end gap-2">
+                  <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-extrabold">취소</button>
+                  <button onclick="confirmSaveToSelectedDriveFolder()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow">이 폴더에 저장하기</button>
+                </div>
+              ` : `
+                <div class="space-y-2 pt-1 border-t border-slate-200">
+                  <div class="text-xs font-extrabold text-slate-700">선택한 폴더 내 저장된 퀴즈 (${folderItems.length}개)</div>
+                  ${folderItems.length === 0 ? `
+                    <div class="p-4 rounded-xl bg-slate-50 text-center text-xs text-slate-400">이 폴더에 저장된 퀴즈가 없습니다.</div>
+                  ` : `
+                    <div class="space-y-1.5 max-h-40 overflow-y-auto">
+                      ${folderItems.map(q => `
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                          <div>
+                            <div class="text-xs font-extrabold text-slate-900">${escapeHtml(q.title)}</div>
+                            <div class="text-[11px] text-slate-500">${q.questions.length}문항 · ${escapeHtml(q.updatedAt || '')}</div>
+                          </div>
+                          <button onclick="importSingleDriveQuiz('${q.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">불러오기</button>
+                        </div>
+                      `).join('')}
+                    </div>
+                  `}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ==========================================
+    // 7. AI 퀴즈 생성 엔진 (학년 성취기준 준수 + 기초 자료 + 엑셀)
+    // ==========================================
+    function toggleCreatorGrade(grade) {
+      const idx = state.creator.selectedGrades.indexOf(grade);
+      if (idx >= 0) {
+        state.creator.selectedGrades.splice(idx, 1);
+      } else {
+        state.creator.selectedGrades.push(grade);
+      }
+      render();
+    }
+
+    function toggleCreatorFormat(fmt) {
+      const idx = state.creator.selectedFormats.indexOf(fmt);
+      if (idx >= 0) {
+        state.creator.selectedFormats.splice(idx, 1);
+      } else {
+        state.creator.selectedFormats.push(fmt);
+      }
+      render();
+    }
+
+    function toggleCreatorCategory(cat) {
+      state.creator.mixAllCategories = false;
+      const idx = state.creator.selectedCategories.indexOf(cat);
+      if (idx >= 0) {
+        state.creator.selectedCategories.splice(idx, 1);
+      } else {
+        state.creator.selectedCategories.push(cat);
+      }
+      render();
+    }
+
+    function toggleMixAllCategories() {
+      state.creator.mixAllCategories = !state.creator.mixAllCategories;
+      if (state.creator.mixAllCategories) {
+        state.creator.selectedCategories = [...CATEGORY_GROUPS.general, ...CATEGORY_GROUPS.curriculum];
+      } else {
+        state.creator.selectedCategories = [];
+      }
+      render();
+    }
+
+    function generateGradeCurriculumBank(grades, categories, customTopic) {
+      const maxSelectedGrade = grades.some(g => g.includes('중등'))
+        ? 9
+        : Math.max(...grades.map(g => parseInt(g.replace(/[^0-9]/g, ''), 10) || 3));
+      const gradeLabel = grades.join(', ');
+      const topicPrefix = customTopic ? `[${customTopic}] ` : '';
+
+      const bank = [
+        // 국어 (학년 수준 반영)
+        {
+          cat: '국어', maxGrade: 6, type: 'OX',
+          question: `${topicPrefix}낱말의 뜻을 정확하게 알기 위해 국어사전을 찾을 때는 자음자 순서(ㄱ, ㄴ, ㄷ...)에 따라 찾는다.`,
+          options: ['O (그렇다)', 'X (아니다)'], answerIndex: 0,
+          explanation: `${gradeLabel} 국어 성취기준: 국어사전에서 낱말을 찾는 순서를 이해합니다.`
+        },
+        {
+          cat: '국어', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}다음 중 의견과 까닭이 잘 드러나게 글을 읽을 때 가장 알맞은 태도는 무엇인가요?`,
+          options: ['글쓴이의 주장이 타당한지 생각해 본다', '제목만 읽고 넘어간다', '그림만 보고 내용을 추측한다', '받침이 틀린 글자만 찾는다'],
+          answerIndex: 0,
+          explanation: `${gradeLabel} 국어 성취기준: 글쓴이의 의견과 까닭을 파악하며 읽습니다.`
+        },
+        // 수학 (종이 없이 머리로 풀 수 있는 해당 학년 이하 암산·추론)
+        {
+          cat: '수학', maxGrade: 2, type: '4CHOICE',
+          question: `${topicPrefix}종이 없이 암산해 보세요! 10원짜리 동전 7개와 1원짜리 동전 5개를 합하면 모두 얼마일까요?`,
+          options: ['70원', '75원', '57원', '85원'], answerIndex: 1,
+          explanation: `${gradeLabel} 수학 성취기준(두 자리 수): 10이 7개이면 70, 1이 5개이면 5이므로 75원입니다.`
+        },
+        {
+          cat: '수학', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}종이 없이 머리로 풀어 보세요! 삼각형의 세 각의 크기를 모두 더하면 몇 도인가요?`,
+          options: ['90도', '180도', '270도', '360도'], answerIndex: 1,
+          explanation: `${gradeLabel} 수학 성취기준(평면도형): 삼각형의 세 각의 크기의 합은 항상 180도입니다.`
+        },
+        // 시사 상식 / 넌센스 / 음식 / 스포츠 / 확장 분야
+        {
+          cat: '시사 상식', maxGrade: 6, type: 'OX',
+          question: `${topicPrefix}플라스틱이나 종이를 분리배출하면 자원을 재활용하여 지구 환경을 보호할 수 있다.`,
+          options: ['O (그렇다)', 'X (아니다)'], answerIndex: 0,
+          explanation: '올바른 분리배출은 쓰레기를 줄이고 자원을 절약합니다.'
+        },
+        {
+          cat: '넌센스', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}머리로 생각하며 맞혀 보세요! 왕이 넘어지면 무엇이 될까요?`,
+          options: ['킹콩', '왕밤빵', '왕관', '왕자'], answerIndex: 0,
+          explanation: '왕(King) + 넘어짐(콩) = 킹콩입니다!'
+        },
+        {
+          cat: '음식', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}우리나라에서 정월대보름에 한 해의 건강을 기원하며 먹는 견과류 풍습은 무엇인가요?`,
+          options: ['송편 빚기', '부럼 깨기', '떡국 먹기', '팥죽 먹기'], answerIndex: 1,
+          explanation: '정월대보름 아침에는 호두, 땅콩 등 부럼을 깨며 건강을 기원합니다.'
+        },
+        {
+          cat: '스포츠', maxGrade: 6, type: 'OX',
+          question: `${topicPrefix}축구 경기에서 골키퍼를 제외한 선수는 경기 중 손으로 공을 잡으면 반칙이다.`,
+          options: ['O (그렇다)', 'X (아니다)'], answerIndex: 0,
+          explanation: '축구에서는 골키퍼 외의 선수가 손이나 팔로 공을 다루면 핸드볼 반칙입니다.'
+        },
+        {
+          cat: '동물·자연', maxGrade: 6, type: 'OX',
+          question: `${topicPrefix}개구리처럼 어릴 때는 물속에서 아가미로 숨 쉬고, 자라면 땅 위에서 폐와 피부로 숨 쉬는 동물을 양서류라고 한다.`,
+          options: ['O (그렇다)', 'X (아니다)'], answerIndex: 0,
+          explanation: '개구리, 두꺼비, 도롱뇽 등은 물과 땅 양쪽에서 살아가는 양서류입니다.'
+        },
+        {
+          cat: '세계·문화', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}다음 중 우리나라의 전통 의상인 한복처럼, 일본의 전통 의상을 부르는 말은 무엇인가요?`,
+          options: ['치파오', '기모노', '아오자이', '판초'], answerIndex: 1,
+          explanation: '일본의 전통 의상은 기모노이며, 치파오는 중국, 아오자이는 베트남의 전통 의상입니다.'
+        },
+        {
+          cat: '역사·위인', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}조선 시대에 백성들이 글을 쉽게 읽고 쓸 수 있도록 훈민정음을 창제하신 왕은 누구인가요?`,
+          options: ['태조', '세종대왕', '정조', '영조'], answerIndex: 1,
+          explanation: '세종대왕은 1443년 훈민정음을 창제하고 1446년에 반포하셨습니다.'
+        },
+        {
+          cat: '인체·건강', maxGrade: 6, type: 'OX',
+          question: `${topicPrefix}우리가 숨을 들이마실 때 몸속으로 들어온 산소를 받아들이고 이산화탄소를 내보내는 기관은 '폐(허파)'이다.`,
+          options: ['O (그렇다)', 'X (아니다)'], answerIndex: 0,
+          explanation: '폐(허파)는 호흡을 통해 산소와 이산화탄소를 교환하는 중요한 기관입니다.'
+        },
+        {
+          cat: '우주·환경', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}태양계 행성 중 지구와 가장 가까우며, 밤하늘에서 샛별이라고도 불리는 행성은 무엇인가요?`,
+          options: ['금성', '토성', '천왕성', '해왕성'], answerIndex: 0,
+          explanation: '금성은 지구에서 볼 때 태양과 달 다음으로 밝게 빛나며 샛별이라고 불립니다.'
+        },
+        {
+          cat: '속담·사자성어', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}속담 '백지장도 맞들면 낫다'가 뜻하는 가장 알맞은 의미는 무엇인가요?`,
+          options: ['종이는 가벼워서 혼자 들어야 한다', '아무리 쉬운 일이라도 서로 협력하면 훨씬 쉽다', '편지를 쓸 때는 백지를 써야 한다', '힘센 사람이 모든 일을 해야 한다'], answerIndex: 1,
+          explanation: '쉬운 일이라도 여럿이 힘을 합치면 더 쉽게 해낼 수 있다는 뜻입니다.'
+        },
+        {
+          cat: '안전·교통', maxGrade: 6, type: 'OX',
+          question: `${topicPrefix}횡단보도를 건널 때는 신호등이 초록불로 바뀌었더라도 좌우에서 차가 멈추었는지 확인한 뒤 건너야 한다.`,
+          options: ['O (그렇다)', 'X (아니다)'], answerIndex: 0,
+          explanation: '신호가 바뀐 직후에도 멈추지 않는 차량이 있을 수 있으므로 좌우 확인 후 건너야 안전합니다.'
+        },
+        {
+          cat: '예술·음악', maxGrade: 6, type: '4CHOICE',
+          question: `${topicPrefix}다음 악기 중 활로 줄을 문질러 소리를 내는 현악기는 무엇인가요?`,
+          options: ['플루트', '트럼펫', '바이올린', '실로폰'], answerIndex: 2,
+          explanation: '바이올린은 활로 현을 문질러 소리를 내는 대표적인 찰현악기입니다.'
+        }
+      ];
+
+      // 선택한 최고 학년보다 높은 학년 문제 제외 및 선택 카테고리 필터링
+      let filtered = bank.filter(item => {
+        const gradeOk = maxSelectedGrade >= 9 ? true : item.maxGrade <= Math.max(maxSelectedGrade, 3);
+        const catOk = categories.includes(item.cat);
+        return gradeOk && catOk;
+      });
+      if (!filtered.length) filtered = bank;
+      return filtered;
+    }
+
+    function validateAiCommonSettings() {
+      const c = state.creator;
+      if (!c.selectedFormats.length) {
+        showToast('상위 설정에서 문제 유형(OX 퀴즈 또는 4지선다)을 1개 이상 선택해 주세요.', 'warning');
+        return false;
+      }
+      return true;
+    }
+
+    function runTopicAiQuizGeneration() {
+      if (!state.auth.isLoggedIn) {
+        showToast('AI 퀴즈 만들기를 위해 먼저 우측 상단에서 Google 로그인을 해주세요.', 'warning');
+        openModal('login');
+        return;
+      }
+      if (!validateAiCommonSettings()) return;
+
+      const c = state.creator;
+      if (!c.selectedGrades.length) {
+        showToast('대상 학년을 1개 이상 선택해 주세요. (중복 선택 가능)', 'warning');
+        return;
+      }
+      if (!c.selectedCategories.length) {
+        showToast('분야 또는 교과목을 1개 이상 선택해 주세요. (중복 선택 가능)', 'warning');
+        return;
+      }
+
+      const count = Math.min(50, Math.max(1, Number(c.questionCount) || 5));
+      const gradeSummary = c.selectedGrades.join('·');
+      const label = c.customTopic.trim() || `${gradeSummary} ${c.mixAllCategories ? '전 영역 혼합' : c.selectedCategories.join('·')} 퀴즈`;
+      if (!consumeAiQuota(count, label)) return;
+
+      const pool = generateGradeCurriculumBank(c.selectedGrades, c.selectedCategories, c.customTopic.trim());
+      const allowOx = c.selectedFormats.includes('OX');
+      const allow4 = c.selectedFormats.includes('4CHOICE');
+
+      const generated = [];
+      for (let i = 0; i < count; i++) {
+        const base = pool[i % pool.length];
+        let item = JSON.parse(JSON.stringify(base));
+        const wantOx = allowOx && allow4 ? (i % 2 === 0) : allowOx;
+
+        if (wantOx && item.type !== 'OX') {
+          item = {
+            type: 'OX',
+            question: `[${item.cat}] ${item.question.replace(/\?$/, '')}의 정답은 '${item.options[item.answerIndex]}'이다.`,
+            options: ['O (그렇다)', 'X (아니다)'],
+            answerIndex: 0,
+            explanation: item.explanation
+          };
+        } else if (!wantOx && item.type !== '4CHOICE') {
+          item = {
+            type: '4CHOICE',
+            question: `[${item.cat}] 다음 설명에 대해 가장 알맞은 것을 고르세요: "${item.question}"`,
+            options: ['맞는 설명이다 (O)', '틀린 설명이다 (X)', '조건에 따라 다르다', '알 수 없다'],
+            answerIndex: 0,
+            explanation: item.explanation
+          };
+        }
+        item.id = 'gen_' + Date.now() + '_' + i;
+        item.stage = 'main';
+        generated.push(item);
+      }
+
+      state.creator.editingQuizId = null;
+      state.creator.title = label;
+      state.creator.draftQuestions = generated;
+      render();
+      setTimeout(() => {
+        document.getElementById('draft-questions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+      showToast(`Gemini AI가 ${gradeSummary} 맞춤 퀴즈 ${generated.length}문항을 생성했습니다! 아래에서 바로 확인·수정하세요.`, 'success');
+    }
+
+    function handleMaterialFileSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      state.creator.materialFileName = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        const raw = String(ev.target?.result || '');
+        const cleanText = raw.replace(/[^\uAC00-\uD7A3a-zA-Z0-9\s.,?!()%~-]/g, ' ').replace(/\s+/g, ' ').trim();
+        state.creator.materialText = cleanText.length > 30
+          ? cleanText.slice(0, 3000)
+          : `[첨부 문서: ${file.name}] 본 자료의 핵심 개념과 주요 내용을 바탕으로 출제된 학습 확인 문항입니다.`;
+        render();
+        showToast(`'${file.name}' 자료가 첨부되었습니다.`, 'success');
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function runMaterialAiQuizGeneration() {
+      if (!state.auth.isLoggedIn) {
+        showToast('AI 퀴즈 만들기를 위해 먼저 우측 상단에서 Google 로그인을 해주세요.', 'warning');
+        openModal('login');
+        return;
+      }
+      if (!validateAiCommonSettings()) return;
+
+      const c = state.creator;
+      if (!c.materialFileName && !c.materialText.trim()) {
+        showToast('먼저 PDF, 이미지, 한글, 워드, PPT 파일을 첨부하거나 핵심 내용을 입력해 주세요.', 'warning');
+        return;
+      }
+
+      const count = Math.min(50, Math.max(1, Number(c.questionCount) || 5));
+      const sourceName = c.materialFileName || '직접 입력 기초 자료';
+      if (!consumeAiQuota(count, `자료 출제: ${sourceName}`)) return;
+
+      const sentences = (c.materialText || sourceName)
+        .split(/[.!?\n]/)
+        .map(s => s.trim())
+        .filter(s => s.length >= 6);
+
+      const allowOx = c.selectedFormats.includes('OX');
+      const allow4 = c.selectedFormats.includes('4CHOICE');
+
+      const generated = [];
+      for (let i = 0; i < count; i++) {
+        const snippet = sentences[i % Math.max(1, sentences.length)] || `${sourceName}의 핵심 학습 내용`;
+        const useOx = allowOx && allow4 ? (i % 2 === 0) : allowOx;
+        if (useOx) {
+          generated.push({
+            id: 'mat_' + Date.now() + '_' + i,
+            stage: 'main',
+            type: 'OX',
+            question: `[자료 기반] "${snippet.slice(0, 65)}" 내용은 첨부된 자료의 설명과 일치한다.`,
+            options: ['O (그렇다)', 'X (아니다)'],
+            answerIndex: 0,
+            explanation: `첨부 자료(${sourceName}) 본문에서 확인된 사실입니다.`
+          });
+        } else {
+          generated.push({
+            id: 'mat_' + Date.now() + '_' + i,
+            stage: 'main',
+            type: '4CHOICE',
+            question: `[자료 기반] 다음 중 '${sourceName}' 자료에서 다룬 핵심 내용으로 옳은 것은?`,
+            options: [
+              snippet.slice(0, 48),
+              '자료에 언급되지 않은 반대 개념이다',
+              '전혀 다른 단원의 내용이다',
+              '해당 사항이 전혀 없다'
+            ],
+            answerIndex: 0,
+            explanation: `첨부 자료(${sourceName}) 근거 문장: ${snippet.slice(0, 60)}`
+          });
+        }
+      }
+
+      state.creator.editingQuizId = null;
+      state.creator.title = `${sourceName} 기반 퀴즈`;
+      state.creator.draftQuestions = generated;
+      render();
+      setTimeout(() => {
+        document.getElementById('draft-questions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+      showToast(`첨부 자료 기반으로 ${generated.length}문항이 생성되었습니다! 아래에서 바로 확인·수정하세요.`, 'success');
+    }
+
+    // 엑셀 양식 다운로드 / 업로드
+    function downloadExcelTemplate() {
+      const rows = [
+        ['문제유형(OX 또는 4지선다)', '질문내용', '보기1', '보기2', '보기3(OX는 비움)', '보기4(OX는 비움)', '정답번호(1~4)', '해설'],
+        ['OX', '지구는 태양 주위를 1년에 한 바퀴 공전한다.', 'O (그렇다)', 'X (아니다)', '', '', 1, '지구의 공전 주기는 약 365일(1년)입니다.'],
+        ['4지선다', '다음 중 우리나라의 수도는 어디인가요?', '부산', '서울', '대전', '광주', 2, '대한민국의 수도는 서울특별시입니다.']
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '무브앤퀴즈_양식');
+      XLSX.writeFile(wb, '무브앤퀴즈_표준양식.xlsx');
+      showToast('엑셀 표준 양식이 다운로드되었습니다.', 'success');
+    }
+
+    function exportQuestionsToExcel(title, questions) {
+      if (!questions || !questions.length) {
+        showToast('다운로드할 문제가 없습니다.', 'warning');
+        return;
+      }
+      const rows = [
+        ['문제유형(OX 또는 4지선다)', '질문내용', '보기1', '보기2', '보기3', '보기4', '정답번호(1~4)', '해설']
+      ];
+      questions.forEach(q => {
+        rows.push([
+          q.type === 'OX' ? 'OX' : '4지선다',
+          q.question,
+          q.options[0] || '',
+          q.options[1] || '',
+          q.options[2] || '',
+          q.options[3] || '',
+          (Number(q.answerIndex) || 0) + 1,
+          q.explanation || ''
+        ]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '퀴즈목록');
+      XLSX.writeFile(wb, `${title || '무브앤퀴즈'}.xlsx`);
+      showToast('퀴즈가 엑셀 파일(.xlsx)로 다운로드되었습니다!', 'success');
+    }
+
+    function handleExcelUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        try {
+          const data = new Uint8Array(ev.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          const parsed = [];
+
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || !r[1]) continue;
+            const rawType = String(r[0] || '').trim().toUpperCase();
+            const isOx = rawType.includes('OX');
+            const options = isOx
+              ? [String(r[2] || 'O (그렇다)'), String(r[3] || 'X (아니다)')]
+              : [String(r[2] || '보기 1'), String(r[3] || '보기 2'), String(r[4] || '보기 3'), String(r[5] || '보기 4')];
+            const ansIdx = Math.max(0, Math.min(options.length - 1, (parseInt(r[6], 10) || 1) - 1));
+            parsed.push({
+              id: 'xl_' + Date.now() + '_' + i,
+              stage: 'main',
+              type: isOx ? 'OX' : '4CHOICE',
+              question: String(r[1]).trim(),
+              options,
+              answerIndex: ansIdx,
+              explanation: String(r[7] || '').trim()
+            });
+          }
+
+          if (!parsed.length) {
+            showToast('엑셀 파일에서 유효한 문항을 찾지 못했습니다.', 'error');
+            return;
+          }
+          state.creator.editingQuizId = null;
+          state.creator.title = file.name.replace(/\.[^/.]+$/, '');
+          state.creator.draftQuestions = parsed;
+          render();
+          showToast(`엑셀에서 ${parsed.length}문항을 성공적으로 불러왔습니다!`, 'success');
+        } catch (err) {
+          showToast('엑셀 파일을 읽는 중 오류가 발생했습니다.', 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // 웹에서 즉시 문항 수정, 중간 삽입, 패자부활전 지정 및 보관함/Drive 저장
+    function updateDraftQuestionField(index, field, value) {
+      const q = state.creator.draftQuestions[index];
+      if (!q) return;
+      if (field === 'question') q.question = value;
+      else if (field === 'explanation') q.explanation = value;
+      else if (field === 'stage') {
+        q.stage = value;
+        render();
+      } else if (field === 'answerIndex') {
+        q.answerIndex = Number(value);
+        render();
+      } else if (field.startsWith('option_')) {
+        const optIdx = Number(field.split('_')[1]);
+        q.options[optIdx] = value;
+      }
+    }
+
+    function removeDraftQuestion(index) {
+      state.creator.draftQuestions.splice(index, 1);
+      render();
+    }
+
+    function insertDraftQuestionAt(insertIndex, type, stage = 'main') {
+      const isRevival = stage === 'revival';
+      const newItem = {
+        id: 'manual_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        stage,
+        type,
+        question: isRevival ? '[패자부활전] 탈락한 친구들이 다시 도전할 수 있는 문제를 입력하세요.' : '새 문제를 여기에 입력하세요.',
+        options: type === 'OX' ? ['O (그렇다)', 'X (아니다)'] : ['보기 1', '보기 2', '보기 3', '보기 4'],
+        answerIndex: 0,
+        explanation: ''
+      };
+      const targetIdx = Math.max(0, Math.min(state.creator.draftQuestions.length, insertIndex));
+      state.creator.draftQuestions.splice(targetIdx, 0, newItem);
+      render();
+      showToast(`${targetIdx + 1}번 위치에 ${isRevival ? '패자부활전' : '본 문제'} 문항이 추가되었습니다.`, 'info');
+    }
+
+    function addEmptyDraftQuestion(type, stage = 'main') {
+      insertDraftQuestionAt(state.creator.draftQuestions.length, type, stage);
+    }
+
+    function editExistingQuizInCreator(quizId) {
+      const target = state.quizzes.find(q => q.id === quizId);
+      if (!target) return;
+      state.creator.mainMode = 'manual';
+      state.creator.editingQuizId = target.id;
+      state.creator.title = target.title;
+      state.creator.draftQuestions = JSON.parse(JSON.stringify(target.questions)).map(q => ({
+        stage: 'main',
+        ...q
+      }));
+      navigate('creator');
+      setTimeout(() => {
+        document.getElementById('draft-questions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+    }
+
+    function saveDraftQuizToLibrary(alsoOpenDrive = false) {
+      if (!state.creator.draftQuestions.length) {
+        showToast('저장할 문제가 없습니다.', 'warning');
+        return;
+      }
+      const existingIdx = state.creator.editingQuizId
+        ? state.quizzes.findIndex(q => q.id === state.creator.editingQuizId)
+        : -1;
+
+      const savedQuiz = {
+        id: existingIdx >= 0 ? state.quizzes[existingIdx].id : ('quiz_' + Date.now()),
+        title: state.creator.title.trim() || '새 맞춤 퀴즈',
+        grade: state.creator.selectedGrades.join('·') || '전학년',
+        categories: [...state.creator.selectedCategories],
+        updatedAt: new Date().toLocaleDateString('ko-KR'),
+        syncedDrive: existingIdx >= 0 ? state.quizzes[existingIdx].syncedDrive : false,
+        driveFolder: existingIdx >= 0 ? state.quizzes[existingIdx].driveFolder : state.driveBrowser.selectedFolder,
+        questions: JSON.parse(JSON.stringify(state.creator.draftQuestions))
+      };
+
+      if (existingIdx >= 0) {
+        state.quizzes[existingIdx] = savedQuiz;
+      } else {
+        state.quizzes.unshift(savedQuiz);
+      }
+      state.creator.editingQuizId = null;
+      state.selectedQuizId = savedQuiz.id;
+      saveQuizzes();
+
+      if (alsoOpenDrive) {
+        requestSaveToGoogleDrive(savedQuiz.id);
+      } else {
+        navigate('library');
+        showToast(`'${savedQuiz.title}' 퀴즈가 보관함에 저장되었습니다!`, 'success');
+      }
+    }
+
+    // ==========================================
+    // 9. 화면별 렌더링 (홈 / 보관함 / 퀴즈 만들기 / 설정 / 게임 실행)
+    // ==========================================
+    function renderHomeScreen() {
+      const selectedQuiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
+      return `
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
+          <div class="bg-white rounded-3xl p-7 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <span class="inline-block px-3.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-black">
+              Move &amp; Quiz · 무브앤퀴즈
+            </span>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+              교실 공간 이동형 실시간 퀴즈<br />
+              <span class="text-blue-600">무브앤퀴즈 플랫폼</span>
+            </h1>
+            <p class="text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed">
+              학생들이 정답 구역으로 몸을 이동하면 머리 위 공중 뱃지가 실시간으로 표시됩니다.
+              상단의 <strong>퀴즈 만들기</strong>에서 새 퀴즈를 생성하거나, 아래에서 준비된 퀴즈를 선택해 바로 수업을 시작하세요.
+            </p>
+            <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold text-slate-600">현재 선택된 수업 퀴즈</span>
+                ${selectedQuiz.isSample ? '<span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-black">기본 체험 샘플</span>' : '<span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-black">내 퀴즈</span>'}
+              </div>
+              <div class="flex flex-col sm:flex-row items-stretch gap-2.5">
+                <select onchange="state.selectedQuizId=this.value; render();" class="flex-1 h-12 px-4 rounded-2xl border border-slate-300 bg-white text-sm sm:text-base font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  ${state.quizzes.map(q => `
+                    <option value="${q.id}" ${q.id === selectedQuiz.id ? 'selected' : ''}>
+                      ${escapeHtml(q.title)} (${q.questions.length}문항)
+                    </option>
+                  `).join('')}
+                </select>
+                <div class="flex items-stretch gap-2 shrink-0">
+                  <button onclick="navigate('creator')" class="h-12 px-5 rounded-2xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-extrabold text-xs sm:text-sm whitespace-nowrap flex items-center justify-center transition">
+                    + 새 퀴즈 출제
+                  </button>
+                  <button onclick="startGameSession('${selectedQuiz.id}')" class="h-12 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm whitespace-nowrap shadow-md flex items-center justify-center transition">
+                    ▶ 수업 시작하기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+              <div class="text-sm font-black text-blue-600">1. 머리 위 공중 뱃지 &amp; 경고</div>
+              <p class="text-xs text-slate-600 leading-relaxed">얼굴을 가리지 않고 머리 위 공중에 선택 번호가 뜨며, 얇은 경계선에 걸치면 경고색·미선택, 영역 이탈 시 뱃지가 깜빡입니다.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+              <div class="text-sm font-black text-purple-600">2. 교육과정 성취기준 &amp; 자료 출제</div>
+              <p class="text-xs text-slate-600 leading-relaxed">상단 <strong>퀴즈 만들기</strong>에서 직접 출제, 첨부 자료 기반 AI 출제, 학년·주제 맞춤 AI 출제 및 패자부활전 문항 삽입이 가능합니다.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+              <div class="text-sm font-black text-emerald-600">3. 엑셀 호환 &amp; Google Drive 저장</div>
+              <p class="text-xs text-slate-600 leading-relaxed">웹에서 즉시 문제를 수정하고 엑셀 양식으로 내려받거나 업로드하며, Google Drive 폴더를 선택해 영구 보관할 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLibraryScreen() {
+      return `
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900">퀴즈 보관함</h2>
+              <p class="text-xs text-slate-500 mt-0.5">저장된 퀴즈를 선택해 수업에 활용하거나 문항 수정·Google Drive 연동을 진행하세요.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="requestLoadFromGoogleDrive()" class="h-10 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-xs font-extrabold shadow-sm flex items-center justify-center whitespace-nowrap">
+                ☁ Google Drive에서 불러오기
+              </button>
+              <button onclick="state.creator.editingQuizId=null; navigate('creator');" class="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold shadow-sm flex items-center justify-center whitespace-nowrap">
+                + 새 퀴즈 만들기
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${state.quizzes.map(q => {
+              const revivalCount = (q.questions || []).filter(item => item.stage === 'revival').length;
+              return `
+                <div class="bg-white rounded-2xl p-5 border ${state.selectedQuizId === q.id ? 'border-blue-600 ring-2 ring-blue-100' : 'border-slate-200'} shadow-sm flex flex-col justify-between gap-4">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-1.5">
+                        <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-extrabold">${escapeHtml(q.grade || '전학년')}</span>
+                        ${revivalCount > 0 ? `<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[10px] font-black">패자부활전 ${revivalCount}문항</span>` : ''}
+                      </div>
+                      <span class="text-[11px] font-bold ${q.syncedDrive ? 'text-emerald-600' : 'text-slate-400'}">
+                        ${q.syncedDrive ? `☁ ${escapeHtml(q.driveFolder || 'Drive 저장됨')}` : (q.isSample ? '기본 제공 샘플' : '브라우저 보관')}
+                      </span>
+                    </div>
+                    <h3 class="font-black text-base text-slate-900">${escapeHtml(q.title)}</h3>
+                    <div class="text-xs text-slate-500">총 ${q.questions.length}문항 · ${(q.categories || []).join(', ')}</div>
+                  </div>
+                  <div class="grid grid-cols-4 gap-1.5 pt-2 border-t border-slate-100">
+                    <button onclick="startGameSession('${q.id}')" class="h-9 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">▶ 시작</button>
+                    <button onclick="editExistingQuizInCreator('${q.id}')" class="h-9 px-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-extrabold flex items-center justify-center whitespace-nowrap">문항 편집</button>
+                    <button onclick="exportQuestionsToExcel('${escapeHtml(q.title)}', state.quizzes.find(x=>x.id==='${q.id}').questions)" class="h-9 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold flex items-center justify-center whitespace-nowrap">엑셀 저장</button>
+                    <button onclick="requestSaveToGoogleDrive('${q.id}')" class="h-9 px-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-extrabold flex items-center justify-center whitespace-nowrap">Drive 저장</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInsertQuestionBar(insertIndex) {
+      return `
+        <div class="flex flex-wrap items-center justify-center gap-2 py-1.5 px-3 rounded-xl border border-dashed border-slate-300 bg-white/80 hover:border-blue-400 transition">
+          <span class="text-[11px] font-bold text-slate-400 mr-1">${insertIndex === 0 ? '맨 앞에 추가:' : `${insertIndex}번 다음 위치에 바로 추가:`}</span>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, 'OX', 'main')" class="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 text-[11px] font-extrabold transition">+ 본 문제(OX)</button>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, '4CHOICE', 'main')" class="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-[11px] font-extrabold transition">+ 본 문제(4지선다)</button>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, 'OX', 'revival')" class="h-7 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold transition">+ 🔥 패자부활전(OX)</button>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, '4CHOICE', 'revival')" class="h-7 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold transition">+ 🔥 패자부활전(4지선다)</button>
+        </div>
+      `;
+    }
+
+    function renderCreatorScreen() {
+      const c = state.creator;
+      return `
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900">퀴즈 만들기</h2>
+              <p class="text-xs text-slate-500 mt-0.5">출제 방식을 먼저 선택한 뒤 세부 조건을 설정해 주세요.</p>
+            </div>
+            ${!state.auth.isLoggedIn && c.mainMode === 'ai' ? `
+              <button onclick="openModal('login')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black shadow">
+                ⚠ AI 출제를 위해 Google 로그인하기
+              </button>
+            ` : ''}
+          </div>
+
+          <!-- 1단계(상위): 직접 출제 vs AI 자동 출제 -->
+          <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
+            <div class="text-xs font-black text-slate-500">STEP 1 · 출제 방식 선택</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button onclick="state.creator.mainMode='manual'; render();" class="p-4 rounded-2xl border-2 text-left transition ${c.mainMode === 'manual' ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
+                <div class="text-base font-black">✍ 직접 출제 · 엑셀 등록</div>
+                <div class="text-xs mt-1 ${c.mainMode === 'manual' ? 'text-emerald-100' : 'text-slate-500'}">웹 편집기에서 문항을 직접 작성하거나 엑셀 양식을 업로드합니다.</div>
+              </button>
+              <button onclick="state.creator.mainMode='ai'; render();" class="p-4 rounded-2xl border-2 text-left transition ${c.mainMode === 'ai' ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
+                <div class="text-base font-black">✨ AI 자동 출제</div>
+                <div class="text-xs mt-1 ${c.mainMode === 'ai' ? 'text-blue-100' : 'text-slate-500'}">수업 자료를 첨부하거나 학년·카테고리를 선택해 AI로 문제를 생성합니다.</div>
+              </button>
+            </div>
+          </div>
+
+          ${c.mainMode === 'manual' ? `
+            <!-- 상위 1: 직접 출제 · 엑셀 등록 -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-black text-slate-900">직접 문항 작성 및 엑셀 일괄 등록</h3>
+                  <p class="text-xs text-slate-500">본 문제 또는 패자부활전 문항을 바로 추가하거나 표준 엑셀 양식을 내려받아 업로드하세요.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button onclick="addEmptyDraftQuestion('OX', 'main')" class="h-10 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">+ 본 문제(OX)</button>
+                  <button onclick="addEmptyDraftQuestion('4CHOICE', 'main')" class="h-10 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">+ 본 문제(4지선다)</button>
+                  <button onclick="addEmptyDraftQuestion('OX', 'revival')" class="h-10 px-3.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">+ 🔥 패자부활전 문항</button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-3">
+                  <div class="space-y-1">
+                    <div class="text-xs font-black text-slate-900">엑셀 표준 양식 받기</div>
+                    <p class="text-[11px] text-slate-600">표준 엑셀 양식(.xlsx)에 문제유형(OX / 4지선다), 질문, 보기, 정답번호를 입력해 준비하세요.</p>
+                  </div>
+                  <button onclick="downloadExcelTemplate()" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold self-start flex items-center justify-center whitespace-nowrap">
+                    ⬇ 엑셀 표준 양식 받기 (.xlsx)
+                  </button>
+                </div>
+                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col justify-between gap-3">
+                  <div class="space-y-1">
+                    <div class="text-xs font-black text-emerald-950">작성한 엑셀 파일 불러오기</div>
+                    <p class="text-[11px] text-emerald-800">업로드하면 하단 웹 편집기에서 바로 수정하고 퀴즈로 사용할 수 있습니다.</p>
+                  </div>
+                  <label class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm self-start inline-flex items-center justify-center cursor-pointer whitespace-nowrap">
+                    ⬆ 엑셀 파일 불러오기
+                    <input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleExcelUpload(event)" />
+                  </label>
+                </div>
+              </div>
+            </div>
+          ` : `
+            <!-- 상위 2: AI 자동 출제 -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
+              <!-- AI 공통 상위 설정 (필수 선택: 문제 유형 중복 선택 + 문항 수) -->
+              <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="text-xs font-black text-blue-950">공통 출제 설정 (필수 · 중복 선택 가능)</span>
+                  <span class="text-[11px] font-bold text-blue-700">미선택 시 안내 알림이 표시됩니다</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="space-y-1.5">
+                    <label class="text-xs font-black text-slate-800 block">문제 유형 (중복 선택 가능 · 필수)</label>
+                    <div class="flex gap-2">
+                      ${[
+                        { id: 'OX', label: 'OX 퀴즈' },
+                        { id: '4CHOICE', label: '4지선다' }
+                      ].map(fmt => {
+                        const active = c.selectedFormats.includes(fmt.id);
+                        return `<button onclick="toggleCreatorFormat('${fmt.id}')" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold border transition ${active ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}">${active ? '✓ ' : ''}${fmt.label}</button>`;
+                      }).join('')}
+                    </div>
+                  </div>
+                  <div class="space-y-1.5">
+                    <label class="text-xs font-black text-slate-800 block">문항 수</label>
+                    <div class="flex flex-wrap gap-1.5">
+                      ${[5, 10, 20].map(num => `
+                        <button onclick="state.creator.isCustomQuestionCount=false; state.creator.questionCount=${num}; render();" class="flex-1 min-w-[60px] py-2.5 rounded-xl text-xs font-extrabold border transition ${!c.isCustomQuestionCount && c.questionCount === num ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}">${num}문항</button>
+                      `).join('')}
+                      <button onclick="state.creator.isCustomQuestionCount=true; render(); setTimeout(()=>document.getElementById('custom-q-count-input')?.focus(), 40);" class="flex-1 min-w-[68px] py-2.5 rounded-xl text-xs font-extrabold border transition ${c.isCustomQuestionCount ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}">직접 입력</button>
+                    </div>
+                    ${c.isCustomQuestionCount ? `
+                      <div class="flex items-center gap-2 pt-1.5">
+                        <input
+                          id="custom-q-count-input"
+                          type="text"
+                          inputmode="numeric"
+                          pattern="[0-9]*"
+                          maxlength="2"
+                          value="${escapeHtml(c.questionCount || '')}"
+                          placeholder="숫자만 입력 (1~50)"
+                          oninput="const onlyNum = this.value.replace(/[^0-9]/g, ''); this.value = onlyNum; state.creator.questionCount = onlyNum ? Math.min(50, Math.max(1, Number(onlyNum))) : '';"
+                          class="w-36 px-3 py-2 rounded-xl border border-blue-400 bg-white text-xs font-black text-slate-900 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span class="text-[11px] font-bold text-slate-600">문항 (숫자만 입력해 주세요 · 최대 50문항)</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2단계(하위): 첨부 자료 기반 출제 vs 학년·주제 맞춤 출제 -->
+              <div class="space-y-2.5">
+                <div class="text-xs font-black text-slate-500">STEP 2 · AI 출제 방식 선택</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button onclick="state.creator.aiSubMode='material'; render();" class="p-3.5 rounded-2xl border-2 text-left transition ${c.aiSubMode === 'material' ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
+                    <div class="text-sm font-black">📄 첨부 자료 기반 출제</div>
+                    <div class="text-[11px] mt-0.5 ${c.aiSubMode === 'material' ? 'text-purple-100' : 'text-slate-500'}">PDF, 이미지, 한글, 워드, PPT 자료 안에서 문제 생성</div>
+                  </button>
+                  <button onclick="state.creator.aiSubMode='selected'; render();" class="p-3.5 rounded-2xl border-2 text-left transition ${c.aiSubMode === 'selected' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
+                    <div class="text-sm font-black">🎯 학년·주제 맞춤 출제</div>
+                    <div class="text-[11px] mt-0.5 ${c.aiSubMode === 'selected' ? 'text-indigo-100' : 'text-slate-500'}">대상 학년과 카테고리를 중복 선택하여 즉시 출제</div>
+                  </button>
+                </div>
+              </div>
+
+              ${c.aiSubMode === 'material' ? `
+                <!-- AI 하위 1: 첨부 자료 기반 출제 -->
+                <div class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-3">
+                  <div class="text-xs font-black text-purple-900">수업 기초 자료 첨부 (PDF, 이미지, 한글 HWP/HWPX, 워드 DOC/DOCX, PPT/PPTX, TXT)</div>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <label class="cursor-pointer px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold shadow-sm">
+                      📎 자료 파일 첨부하기
+                      <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.hwp,.hwpx,.doc,.docx,.ppt,.pptx,.txt" class="hidden" onchange="handleMaterialFileSelect(event)" />
+                    </label>
+                    <span class="text-xs font-bold text-slate-700">${c.materialFileName ? `첨부됨: ${escapeHtml(c.materialFileName)}` : '선택된 파일 없음'}</span>
+                  </div>
+                  <textarea rows="4" oninput="state.creator.materialText=this.value" placeholder="또는 출제할 지문/핵심 내용을 여기에 직접 붙여넣으셔도 됩니다." class="w-full p-3.5 rounded-xl border border-purple-200 bg-white text-xs font-medium">${escapeHtml(c.materialText)}</textarea>
+                  <button onclick="runMaterialAiQuizGeneration()" class="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition">
+                    ✨ 첨부 자료로 퀴즈 생성하기
+                  </button>
+                </div>
+              ` : `
+                <!-- AI 하위 2: 학년·주제 맞춤 출제 -->
+                <div class="space-y-4">
+                  <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-black text-slate-800">1. 대상 학년 선택 (중복 선택 가능 · 필수 · 상위 학년 문제 자동 제외)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      ${GRADE_LIST.map(g => {
+                        const active = c.selectedGrades.includes(g);
+                        return `<button onclick="toggleCreatorGrade('${g}')" class="px-3.5 py-2 rounded-xl text-xs font-extrabold border transition ${active ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}">${active ? '✓ ' : ''}${g}</button>`;
+                      }).join('')}
+                    </div>
+                  </div>
+
+                  <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <span class="text-xs font-black text-slate-800">2. 카테고리 선택 (중복 선택 가능 · 필수)</span>
+                      <button onclick="toggleMixAllCategories()" class="px-3 py-1.5 rounded-xl text-xs font-black border transition ${c.mixAllCategories ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50'}">
+                        ${c.mixAllCategories ? '✓ 전체 영역 혼합 선택됨' : '전체 영역 혼합 선택'}
+                      </button>
+                    </div>
+                    <div class="space-y-2">
+                      <div class="text-[11px] font-bold text-slate-500">분야</div>
+                      <div class="flex flex-wrap gap-2">
+                        ${CATEGORY_GROUPS.general.map(cat => {
+                          const active = c.selectedCategories.includes(cat);
+                          return `<button onclick="toggleCreatorCategory('${cat}')" class="px-3.5 py-2 rounded-xl text-xs font-extrabold border transition ${active ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}">${active ? '✓ ' : ''}${cat}</button>`;
+                        }).join('')}
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <div class="text-[11px] font-bold text-slate-500">교과목 (국가교육과정 성취기준 반영 · 종이 없이 머리로 푸는 형태)</div>
+                      <div class="flex flex-wrap gap-2">
+                        ${CATEGORY_GROUPS.curriculum.map(cat => {
+                          const active = c.selectedCategories.includes(cat);
+                          return `<button onclick="toggleCreatorCategory('${cat}')" class="px-3.5 py-2 rounded-xl text-xs font-extrabold border transition ${active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'}">${active ? '✓ ' : ''}${cat}</button>`;
+                        }).join('')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <label class="text-xs font-black text-slate-800 block">3. 세부 주제 키워드 입력 (선택 사항)</label>
+                    <input type="text" value="${escapeHtml(c.customTopic)}" oninput="state.creator.customTopic=this.value" placeholder="예: 태양계 행성, 우리나라 전통 음식, 분수의 크기" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold placeholder:font-normal" />
+                  </div>
+
+                  <button onclick="runTopicAiQuizGeneration()" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition">
+                    ✨ 맞춤 조건으로 퀴즈 생성하기
+                  </button>
+                </div>
+              `}
+            </div>
+          `}
+
+          <!-- 생성/업로드된 문제 웹 즉시 확인 및 수정 영역 -->
+          ${c.draftQuestions.length > 0 ? `
+            <div id="draft-questions-section" class="bg-white rounded-3xl p-6 border-2 border-blue-200 shadow-sm space-y-5">
+              <div class="space-y-3 pb-4 border-b border-slate-200">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <label class="text-xs font-black text-slate-700">퀴즈 세트 제목 (웹에서 바로 수정 가능)</label>
+                  <span class="text-[11px] font-bold text-slate-500">총 ${c.draftQuestions.length}문항 (본 문제 ${c.draftQuestions.filter(x => x.stage !== 'revival').length} · 패자부활전 ${c.draftQuestions.filter(x => x.stage === 'revival').length})</span>
+                </div>
+                <div class="flex flex-col lg:flex-row items-stretch gap-2.5">
+                  <input type="text" value="${escapeHtml(c.title)}" oninput="state.creator.title=this.value" class="flex-1 h-11 px-4 rounded-xl border border-slate-300 text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <div class="flex flex-wrap items-stretch gap-2 shrink-0">
+                    <button onclick="exportQuestionsToExcel(state.creator.title, state.creator.draftQuestions)" class="h-11 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">⬇ 엑셀 내보내기</button>
+                    <button onclick="saveDraftQuizToLibrary(false)" class="h-11 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">내 보관함에 저장</button>
+                    <button onclick="saveDraftQuizToLibrary(true)" class="h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">☁ Google Drive에 저장</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                ${renderInsertQuestionBar(0)}
+                ${c.draftQuestions.map((q, idx) => {
+                  const isRevival = q.stage === 'revival';
+                  return `
+                    <div class="p-4 rounded-2xl ${isRevival ? 'bg-rose-50/60 border-2 border-rose-300' : 'bg-slate-50 border border-slate-200'} space-y-3">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <span class="px-2.5 py-1 rounded-lg ${isRevival ? 'bg-rose-600 text-white' : 'bg-blue-100 text-blue-800'} text-xs font-black">
+                            문항 ${idx + 1} · ${q.type === 'OX' ? 'OX 퀴즈' : '4지선다'}
+                          </span>
+                          <!-- 본 문제 / 패자부활전 구분 선택 버튼 -->
+                          <div class="inline-flex rounded-xl bg-white p-0.5 border border-slate-300">
+                            <button onclick="updateDraftQuestionField(${idx}, 'stage', 'main')" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition ${!isRevival ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}">본 문제</button>
+                            <button onclick="updateDraftQuestionField(${idx}, 'stage', 'revival')" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition ${isRevival ? 'bg-rose-600 text-white' : 'text-slate-600 hover:bg-rose-50'}">🔥 패자부활전</button>
+                          </div>
+                        </div>
+                        <button onclick="removeDraftQuestion(${idx})" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-rose-200 text-xs font-extrabold text-rose-600">삭제</button>
+                      </div>
+                      <input type="text" value="${escapeHtml(q.question)}" oninput="updateDraftQuestionField(${idx}, 'question', this.value)" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-bold" />
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        ${q.options.map((opt, oIdx) => `
+                          <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border ${q.answerIndex === oIdx ? 'border-emerald-500 ring-1 ring-emerald-200' : 'border-slate-200'}">
+                            <input type="radio" name="ans_${idx}" ${q.answerIndex === oIdx ? 'checked' : ''} onchange="updateDraftQuestionField(${idx}, 'answerIndex', ${oIdx})" />
+                            <input type="text" value="${escapeHtml(opt)}" oninput="updateDraftQuestionField(${idx}, 'option_${oIdx}', this.value)" class="flex-1 text-xs font-bold focus:outline-none" />
+                            ${q.answerIndex === oIdx ? '<span class="text-[10px] font-black text-emerald-600">정답</span>' : ''}
+                          </div>
+                        `).join('')}
+                      </div>
+                      <input type="text" value="${escapeHtml(q.explanation || '')}" oninput="updateDraftQuestionField(${idx}, 'explanation', this.value)" placeholder="해설 입력 (선택)" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-600" />
+                    </div>
+                    ${renderInsertQuestionBar(idx + 1)}
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderSettingsScreen() {
+      const g = state.game;
+      const tab = state.settingsTab;
+      const accountLabel = state.auth.isLoggedIn ? state.auth.user?.email : '비로그인(게스트)';
+      const activeTheme = THEME_CONFIGS[g.theme] || THEME_CONFIGS.classic;
+
+      return `
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900">게임·카메라 및 수업 규칙 설정</h2>
+              <p class="text-xs text-slate-500 mt-0.5">모든 설정은 <strong>${escapeHtml(accountLabel)}</strong> 계정에 자동 저장되어 다음 접속 시에도 유지됩니다.</p>
+            </div>
+            <button onclick="Object.assign(state.game, JSON.parse(JSON.stringify(DEFAULT_USER_PREFS))); saveUserGamePrefs(); render(); if(state.settingsTab==='camera') initSettingsCameraPreview(); showToast('기본 설정으로 초기화되었습니다.', 'info');" class="h-10 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-extrabold">
+              기본값 복원
+            </button>
+          </div>
+
+          <!-- 설정 상단 3개 탭 버튼 -->
+          <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm grid grid-cols-3 gap-1.5">
+            <button onclick="switchSettingsTab('theme')" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-1.5 ${tab === 'theme' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
+              <span>🎨 디자인 테마</span>
+              <span class="hidden sm:inline text-[11px] opacity-85">(${activeTheme.name})</span>
+            </button>
+            <button onclick="switchSettingsTab('rules')" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-1.5 ${tab === 'rules' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
+              <span>🏆 게임 진행·생존 규칙</span>
+            </button>
+            <button onclick="switchSettingsTab('camera')" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-1.5 ${tab === 'camera' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
+              <span>📷 카메라·구역 인식</span>
+            </button>
+          </div>
+
+          ${tab === 'theme' ? `
+            <!-- 탭 1: 학생 선호 맞춤형 디자인 테마 -->
+            <div class="rounded-3xl p-6 border shadow-sm space-y-5 ${activeTheme.panelClass}">
+              <div>
+                <h3 class="text-base font-black">학생 선호 맞춤형 디자인 테마 선택</h3>
+                <p class="text-xs opacity-75 mt-0.5">테마를 클릭하면 색상뿐 아니라 각 테마 전용 글꼴(폰트)과 배경 화면이 지금 바로 전환됩니다.</p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                ${Object.values(THEME_CONFIGS).map(th => {
+                  const selected = g.theme === th.id;
+                  return `
+                    <button onclick="updateGamePref('theme', '${th.id}'); showToast('${th.name} 테마 및 전용 폰트가 즉시 적용되었습니다.', 'success');" class="p-5 rounded-2xl border-2 text-left transition flex flex-col justify-between gap-3 ${selected ? 'border-blue-600 bg-blue-500/15 ring-2 ring-blue-300 shadow-sm' : 'border-slate-300/60 bg-slate-500/5 hover:bg-slate-500/10'}">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-black">${th.badge}</span>
+                        ${selected ? '<span class="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[11px] font-black">✓ 현재 적용됨</span>' : ''}
+                      </div>
+                      <div>
+                        <div class="text-base font-black">${th.name} <span class="text-xs font-bold opacity-60">(${th.en})</span></div>
+                        <div class="text-[11px] font-extrabold text-blue-600 mt-0.5">적용 폰트: ${th.fontName}</div>
+                        <p class="text-xs opacity-80 mt-1">${th.desc}</p>
+                      </div>
+                      <div class="flex gap-1.5 pt-1">
+                        ${th.zonePalette.map(c => `<span class="h-4 flex-1 rounded-md border border-black/10" style="background:${c}"></span>`).join('')}
+                      </div>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : tab === 'rules' ? `
+            <!-- 탭 2: 최종 생존 목표 인원, 전원 탈락 처리 규칙, 시간 설정 -->
+            <div class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- 최종 목표 인원 선택 -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+                  <div class="text-sm font-black text-amber-600">1. 최종 생존 목표 인원 선택</div>
+                  <p class="text-xs text-slate-500">생존자가 목표 인원 이하로 좁혀지면 우승 축하 화면으로 퀴즈를 마무리합니다.</p>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    ${[
+                      { val: 1, label: '최후의 1인', sub: '골든벨 방식' },
+                      { val: 2, label: '최후의 2명', sub: 'TOP 2 결승' },
+                      { val: 3, label: '최후의 3명', sub: 'TOP 3 시상' },
+                      { val: 5, label: '최후의 5명', sub: 'TOP 5 선발' },
+                      { val: 0, label: '전체 문항 완주', sub: '끝까지 진행' }
+                    ].map(opt => {
+                      const active = Number(g.targetSurvivors) === opt.val;
+                      return `
+                        <button onclick="updateGamePref('targetSurvivors', ${opt.val})" class="p-3 rounded-2xl border-2 text-left transition ${active ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
+                          <div class="text-xs font-black">${opt.label}</div>
+                          <div class="text-[10px] mt-0.5 ${active ? 'text-slate-900 font-bold' : 'text-slate-500'}">${opt.sub}</div>
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <!-- 퀴즈 진행 및 타이머 규칙 -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+                  <div class="text-sm font-black text-blue-600">2. 시간 및 진행 방식 설정</div>
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-extrabold">
+                      <span>문제 풀이 제한 시간</span>
+                      <span class="text-blue-600">${g.solveTimeSec}초</span>
+                    </div>
+                    <input type="range" min="5" max="60" step="1" value="${g.solveTimeSec}" oninput="updateGamePref('solveTimeSec', Number(this.value))" class="w-full" />
+                  </div>
+                  <div class="space-y-1 pt-2 border-t border-slate-100">
+                    <div class="flex justify-between text-xs font-extrabold">
+                      <span>카운트다운 효과음 시작 시점</span>
+                      <span class="text-blue-600">${g.countdownSoundStartSec === 0 ? '소리 끔' : `종료 ${g.countdownSoundStartSec}초 전부터`}</span>
+                    </div>
+                    <input type="range" min="0" max="15" step="1" value="${g.countdownSoundStartSec}" oninput="updateGamePref('countdownSoundStartSec', Number(this.value))" class="w-full" />
+                  </div>
+                  <div class="space-y-1 pt-2 border-t border-slate-100">
+                    <div class="flex justify-between text-xs font-extrabold">
+                      <span>정답 확인 및 탈락자 이동 시간</span>
+                      <span class="text-blue-600">${g.revealMoveTimeSec}초</span>
+                    </div>
+                    <input type="range" min="3" max="30" step="1" value="${g.revealMoveTimeSec}" oninput="updateGamePref('revealMoveTimeSec', Number(this.value))" class="w-full" />
+                  </div>
+                  <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <span class="text-xs font-black text-slate-800">다음 문제 넘김</span>
+                    <div class="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200">
+                      <button onclick="updateGamePref('autoAdvance', false)" class="h-8 px-3 rounded-lg text-xs font-extrabold ${!g.autoAdvance ? 'bg-slate-900 text-white' : 'text-slate-600'}">수동 넘김</button>
+                      <button onclick="updateGamePref('autoAdvance', true)" class="h-8 px-3 rounded-lg text-xs font-extrabold ${g.autoAdvance ? 'bg-blue-600 text-white' : 'text-slate-600'}">자동 넘김</button>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <span class="text-xs font-black text-slate-800">패자부활전 문항 실행</span>
+                    <button onclick="updateGamePref('enableRevival', !state.game.enableRevival)" class="h-8 px-3.5 rounded-xl text-xs font-extrabold ${g.enableRevival ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                      ${g.enableRevival ? '사용함' : '건너뛰기'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 전원 탈락 시 처리 규칙 & 안내 문구 편집 -->
+              <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <div>
+                  <div class="text-sm font-black text-rose-600">3. 전원 탈락 시 처리 규칙 및 학생 화면 안내 문구 편집</div>
+                  <p class="text-xs text-slate-500 mt-0.5">목표 인원 도달 전 모든 학생이 오답을 선택했을 때 적용할 규칙과 학생 화면에 크게 띄울 문구를 직접 수정하세요.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  ${[
+                    { id: 'revive_all', num: '①', title: '전원 부활', desc: '탈락한 전원에게 한 번 더 기회를 주어 다시 참여시킵니다.', msgKey: 'allEliminatedMsgRevive' },
+                    { id: 'void_round', num: '②', title: '탈락 무효', desc: '이번 문제 결과를 무효로 하고 직전 생존 인원 그대로 진행합니다.', msgKey: 'allEliminatedMsgVoid' },
+                    { id: 'end_game', num: '③', title: '즉시 게임 종료', desc: '전원 탈락 안내를 띄우고 현재 라운드에서 퀴즈를 종료합니다.', msgKey: 'allEliminatedMsgEnd' }
+                  ].map(rule => {
+                    const active = g.allEliminatedRule === rule.id;
+                    return `
+                      <div onclick="updateGamePref('allEliminatedRule', '${rule.id}')" class="cursor-pointer p-4 rounded-2xl border-2 transition space-y-2.5 ${active ? 'border-rose-600 bg-rose-50/50 shadow-sm' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}">
+                        <div class="flex items-center justify-between">
+                          <span class="text-xs font-black ${active ? 'text-rose-700' : 'text-slate-900'}">${rule.num} ${rule.title}</span>
+                          ${active ? '<span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black">선택됨</span>' : ''}
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed">${rule.desc}</p>
+                        <div onclick="event.stopPropagation()">
+                          <label class="text-[10px] font-extrabold text-slate-500 block mb-1">학생 화면 대형 안내 문구</label>
+                          <textarea rows="2" oninput="updateGamePref('${rule.msgKey}', this.value, false)" class="w-full p-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500">${escapeHtml(g[rule.msgKey])}</textarea>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+          ` : `
+            <!-- 탭 3: 카메라·구역 인식 & 실시간 미리보기 시뮬레이터 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <!-- 좌측: 실시간 카메라 및 가상 학생 시뮬레이터 미니 창 -->
+              <div class="lg:col-span-7 rounded-3xl p-5 border shadow-sm space-y-3 ${activeTheme.panelClass}">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div class="text-sm font-black">실시간 카메라 · 구역 인식 미리보기</div>
+                    <p class="text-[11px] opacity-75">카메라를 켜면 실제 얼굴을 인식해 머리 위에 뱃지를 띄우고, 끄면 가상 학생으로 테스트합니다.</p>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="state.settingsPreviewMode='OX'; render(); initSettingsCameraPreview();" class="h-8 px-3 rounded-xl text-xs font-extrabold border ${state.settingsPreviewMode === 'OX' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 text-slate-700 border-slate-200'}">OX 구역</button>
+                    <button onclick="state.settingsPreviewMode='4CHOICE'; render(); initSettingsCameraPreview();" class="h-8 px-3 rounded-xl text-xs font-extrabold border ${state.settingsPreviewMode === '4CHOICE' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 text-slate-700 border-slate-200'}">4지선다 구역</button>
+                    <button onclick="toggleSettingsPreviewCamera()" class="h-8 px-3 rounded-xl text-xs font-extrabold ${g.cameraActive ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}">
+                      ${g.cameraActive ? '카메라 끄기' : '📷 카메라 켜기'}
+                    </button>
+                  </div>
+                </div>
+
+                <div id="settings-preview-box" class="relative w-full h-[350px] rounded-2xl overflow-hidden border-2 border-slate-300 bg-slate-900 select-none">
+                  <video id="settings-preview-video" playsinline muted class="hidden"></video>
+                  <canvas id="settings-preview-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+                  <!-- 설정 화면에서도 위치 및 투명도를 즉시 조정해볼 수 있는 교사 조작 리모컨 미리보기 -->
+                  <div
+                    id="settings-hud-preview"
+                    style="${(g.hudX !== null && g.hudY !== null) ? `left:${Math.min(260, g.hudX)}px; top:${Math.min(180, g.hudY)}px;` : 'right:12px; top:12px;'} opacity:${g.hudOpacity};"
+                    class="absolute z-20 w-[235px] rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/25 text-white shadow-xl p-2.5 space-y-2"
+                  >
+                    <div id="settings-hud-drag-handle" class="cursor-move flex items-center justify-between gap-1 pb-1.5 border-b border-white/15">
+                      <span class="text-[10px] font-black text-amber-300">⠿ 교사 조작 리모컨 (드래그)</span>
+                      <span id="settings-hud-opacity-text" class="text-[10px] font-bold text-slate-300">${Math.round(g.hudOpacity * 100)}%</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 text-[10px] font-extrabold">
+                      <div class="h-7 rounded-lg bg-blue-600 flex items-center justify-center">▶ 문제 제시</div>
+                      <div class="h-7 rounded-lg bg-slate-800 flex items-center justify-center">⏸ 일시정지</div>
+                      <div class="h-7 rounded-lg bg-emerald-600 flex items-center justify-center">✓ 정답 공개</div>
+                      <div class="h-7 rounded-lg bg-indigo-600 flex items-center justify-center">다음 문제 →</div>
+                    </div>
+                  </div>
+
+                  <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/75 text-white text-[10px] font-bold">
+                      ${g.cameraActive ? '실제 카메라 인물 머리 위 뱃지 실시간 인식 중' : '가상 학생 드래그로 구역·경계선(주황)·이탈(깜빡임) 확인'}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/75 text-amber-300 text-[10px] font-bold">
+                      ${g.cameraActive ? '● 웹캠 LIVE' : '● 시뮬레이터'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 우측: 카메라·경계선·배치 세부 조절 -->
+              <div class="lg:col-span-5 rounded-3xl p-5 border shadow-sm space-y-4 ${activeTheme.panelClass}">
+                <div class="text-sm font-black text-emerald-600">구역 배치 및 경계선 세부 조정</div>
+
+                <div class="space-y-1.5">
+                  <div class="text-xs font-black">4지선다 구역 분할 방식</div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button onclick="updateGamePref('choice4Layout', 'horizontal', false); state.settingsPreviewMode='4CHOICE'; render(); initSettingsCameraPreview();" class="p-2.5 rounded-xl border-2 text-left transition ${g.choice4Layout === 'horizontal' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-800 border-slate-200'}">
+                      <div class="text-xs font-black">가로 4구역 (1×4)</div>
+                      <div class="text-[10px] opacity-85">좌에서 우로 1·2·3·4번</div>
+                    </button>
+                    <button onclick="updateGamePref('choice4Layout', 'grid2x2', false); state.settingsPreviewMode='4CHOICE'; render(); initSettingsCameraPreview();" class="p-2.5 rounded-xl border-2 text-left transition ${g.choice4Layout === 'grid2x2' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-800 border-slate-200'}">
+                      <div class="text-xs font-black">사분면 배치 (2×2)</div>
+                      <div class="text-[10px] opacity-85">상하좌우 4칸 구역</div>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-1 pt-2 border-t border-slate-200/70">
+                  <div class="flex justify-between text-xs font-extrabold">
+                    <span>정답 구역 경계선 두께 (실시간 반영)</span>
+                    <span class="text-blue-600">${Math.round(g.boundaryWidthRatio * 1000) / 10}%</span>
+                  </div>
+                  <input type="range" min="0.015" max="0.08" step="0.005" value="${g.boundaryWidthRatio}" oninput="updateGamePref('boundaryWidthRatio', Number(this.value), false); document.getElementById('bound-val-label').textContent=(Math.round(Number(this.value)*1000)/10)+'%';" class="w-full" />
+                  <div class="text-[11px] opacity-75">현재 경계선 폭: <strong id="bound-val-label">${Math.round(g.boundaryWidthRatio * 1000) / 10}%</strong></div>
+                </div>
+
+                <div class="space-y-1 pt-2 border-t border-slate-200/70">
+                  <div class="flex justify-between text-xs font-extrabold">
+                    <span>머리 위 공중 뱃지 띄움 높이</span>
+                    <span class="text-blue-600">${g.headBadgeOffsetPx}px</span>
+                  </div>
+                  <input type="range" min="20" max="80" step="2" value="${g.headBadgeOffsetPx}" oninput="updateGamePref('headBadgeOffsetPx', Number(this.value), false)" class="w-full" />
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-200/70">
+                  <span class="text-xs font-black">카메라 좌우 반전 (거울 모드)</span>
+                  <button onclick="updateGamePref('mirrorCamera', !state.game.mirrorCamera, false); render(); initSettingsCameraPreview();" class="h-8 px-3.5 rounded-xl text-xs font-extrabold ${g.mirrorCamera ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                    ${g.mirrorCamera ? '켜짐' : '꺼짐'}
+                  </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-200/70">
+                  <span class="text-xs font-black">카운트·정답 효과음</span>
+                  <button onclick="updateGamePref('soundEnabled', !state.game.soundEnabled)" class="h-8 px-3.5 rounded-xl text-xs font-extrabold ${g.soundEnabled ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                    ${g.soundEnabled ? '켜짐' : '음소거'}
+                  </button>
+                </div>
+
+                <div class="space-y-1 pt-2 border-t border-slate-200/70">
+                  <div class="flex justify-between text-xs font-extrabold">
+                    <span>교사 조작 리모컨(HUD) 기본 투명도 (좌측 미리보기 즉시 반영)</span>
+                    <span id="settings-hud-opacity-val" class="text-blue-600">${Math.round(g.hudOpacity * 100)}%</span>
+                  </div>
+                  <input type="range" min="0.25" max="1" step="0.05" value="${g.hudOpacity}" oninput="const v=Number(this.value); updateGamePref('hudOpacity', v, false); document.getElementById('settings-hud-opacity-val').textContent=Math.round(v*100)+'%'; const t=document.getElementById('settings-hud-opacity-text'); if(t) t.textContent=Math.round(v*100)+'%'; const h=document.getElementById('settings-hud-preview'); if(h) h.style.opacity=v;" class="w-full" />
+                </div>
+              </div>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function playToneBeep(freq = 880, duration = 0.12, type = 'sine') {
+      if (!state.game.soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.16, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function getActivePlayableQuestions(quiz) {
+      const all = quiz.questions || [];
+      if (state.game.enableRevival) return all;
+      const mainOnly = all.filter(q => q.stage !== 'revival');
+      return mainOnly.length ? mainOnly : all;
+    }
+
+    function presentCurrentQuestion() {
+      const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
+      const questions = getActivePlayableQuestions(quiz);
+      const q = questions[state.game.questionIndex] || questions[0];
+
+      if (state.game.revivalTimeout) {
+        clearTimeout(state.game.revivalTimeout);
+        state.game.revivalTimeout = null;
+      }
+
+      state.game.paused = false;
+      state.game.timeLeft = state.game.solveTimeSec;
+      state.game.revealTimeLeft = state.game.revealMoveTimeSec;
+
+      if (q && q.stage === 'revival') {
+        state.game.participants.forEach(p => { p.eliminated = false; });
+        state.game.phase = 'revival_intro';
+        state.game.specialBannerText = '🔥 패자부활전 🔥';
+        state.game.specialBannerSub = '탈락한 친구들도 모두 구역 안으로 입장하세요!';
+        playToneBeep(523.25, 0.15, 'triangle');
+        setTimeout(() => playToneBeep(783.99, 0.25, 'triangle'), 160);
+        render();
+        initCameraAndGameLoop();
+        state.game.revivalTimeout = setTimeout(() => {
+          if (state.route === 'play' && state.game.phase === 'revival_intro') {
+            state.game.phase = 'answering';
+            render();
+            initCameraAndGameLoop();
+          }
+        }, 2800);
+      } else {
+        state.game.phase = 'answering';
+        playToneBeep(660, 0.12, 'sine');
+        render();
+        initCameraAndGameLoop();
+      }
+    }
+
+    function revealCurrentAnswer() {
+      const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
+      const questions = getActivePlayableQuestions(quiz);
+      const q = questions[state.game.questionIndex] || questions[0];
+
+      const activePlayers = state.game.participants.filter(p => !p.eliminated);
+      const survivorsThisRound = activePlayers.filter(p => p.status === 'selected' && p.choiceIndex === q.answerIndex);
+
+      // 전원 탈락 발생 시 설정된 규칙 처리
+      if (activePlayers.length > 0 && survivorsThisRound.length === 0) {
+        const rule = state.game.allEliminatedRule;
+        if (rule === 'revive_all') {
+          state.game.participants.forEach(p => { p.eliminated = false; });
+          state.game.specialBannerText = '전원 부활!';
+          state.game.specialBannerSub = state.game.allEliminatedMsgRevive;
+          state.game.phase = 'all_eliminated_alert';
+          playToneBeep(523.25, 0.15, 'triangle');
+          render();
+          initCameraAndGameLoop();
+          return;
+        } else if (rule === 'void_round') {
+          state.game.specialBannerText = '이번 문제 무효!';
+          state.game.specialBannerSub = state.game.allEliminatedMsgVoid;
+          state.game.phase = 'all_eliminated_alert';
+          playToneBeep(440, 0.2, 'sine');
+          render();
+          initCameraAndGameLoop();
+          return;
+        } else if (rule === 'end_game') {
+          activePlayers.forEach(p => { p.eliminated = true; });
+          state.game.specialBannerText = '전원 탈락 · 게임 종료';
+          state.game.specialBannerSub = state.game.allEliminatedMsgEnd;
+          state.game.phase = 'finished';
+          playToneBeep(330, 0.3, 'sawtooth');
+          render();
+          initCameraAndGameLoop();
+          return;
+        }
+      }
+
+      // 일반 탈락 처리
+      activePlayers.forEach(p => {
+        if (p.status !== 'selected' || p.choiceIndex !== q.answerIndex) {
+          p.eliminated = true;
+        }
+      });
+
+      const remainingCount = state.game.participants.filter(p => !p.eliminated).length;
+      const target = Number(state.game.targetSurvivors);
+      if (target > 0 && remainingCount > 0 && remainingCount <= target) {
+        state.game.specialBannerText = `🏆 최종 생존 ${remainingCount}명 달성!`;
+        state.game.specialBannerSub = `목표 인원(${target}명 이하)에 도달하여 우승자가 결정되었습니다!`;
+        state.game.phase = 'finished';
+        playToneBeep(880, 0.25, 'triangle');
+        render();
+        initCameraAndGameLoop();
+        return;
+      }
+
+      state.game.phase = 'revealed';
+      state.game.paused = false;
+      state.game.revealTimeLeft = state.game.revealMoveTimeSec;
+      playToneBeep(880, 0.18, 'triangle');
+      render();
+      initCameraAndGameLoop();
+    }
+
+    function goToNextQuestion() {
+      const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
+      const questions = getActivePlayableQuestions(quiz);
+      if (state.game.questionIndex < questions.length - 1) {
+        state.game.questionIndex += 1;
+        presentCurrentQuestion();
+      } else {
+        const remainingCount = state.game.participants.filter(p => !p.eliminated).length;
+        state.game.specialBannerText = '🎉 모든 문항 완주 완료!';
+        state.game.specialBannerSub = `최종 생존 인원: ${remainingCount}명`;
+        state.game.phase = 'finished';
+        state.game.paused = true;
+        render();
+        initCameraAndGameLoop();
+      }
+    }
+
+    function togglePauseGame() {
+      state.game.paused = !state.game.paused;
+      render();
+      initCameraAndGameLoop();
+    }
+
+    function renderPlayScreen() {
+      const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
+      const questions = getActivePlayableQuestions(quiz);
+      const q = questions[state.game.questionIndex] || questions[0];
+      const phase = state.game.phase;
+      const isRevealed = phase === 'revealed' || phase === 'finished';
+      const isRevival = q.stage === 'revival';
+      const g = state.game;
+      const theme = THEME_CONFIGS[g.theme] || THEME_CONFIGS.classic;
+      const aliveCount = g.participants.filter(p => !p.eliminated).length;
+      const isTeacherMonitor = !isStudentDisplayMode;
+
+      const hudStyle = (g.hudX !== null && g.hudY !== null)
+        ? `left: ${g.hudX}px; top: ${g.hudY}px; opacity: ${g.hudOpacity};`
+        : `right: 16px; top: 16px; opacity: ${g.hudOpacity};`;
+
+      return `
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-4 space-y-3">
+          <!-- 상단 문제 출제 카드 -->
+          <div class="rounded-3xl p-4 sm:p-5 border-2 ${isRevival ? 'border-rose-400 ring-2 ring-rose-100' : theme.cardClass} shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="h-7 px-3 rounded-xl bg-slate-900 text-amber-300 text-[11px] font-black inline-flex items-center">
+                  ${theme.badge}
+                </span>
+                <span class="h-7 px-3 rounded-xl ${isRevival ? 'bg-rose-600' : 'bg-blue-600'} text-white text-xs font-black inline-flex items-center">
+                  ${isRevival ? '🔥 패자부활전 · ' : ''}문제 ${g.questionIndex + 1} / ${questions.length}
+                </span>
+                <span id="game-timer-badge" class="h-7 px-3 rounded-xl bg-slate-900 text-white text-xs font-black inline-flex items-center">
+                  ${phase === 'ready' ? `대기 중 (${g.solveTimeSec}초)` : phase === 'revival_intro' ? '패자부활전 안내 중' : isRevealed ? `정답·이동 ${g.revealTimeLeft}초` : `남은 시간 ${g.timeLeft}초`}
+                  ${g.paused ? ' (일시정지)' : ''}
+                </span>
+                <span class="h-7 px-3 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-black inline-flex items-center">
+                  생존 ${aliveCount}명 ${Number(g.targetSurvivors) > 0 ? `(목표 ${g.targetSurvivors}명)` : '(전체 완주)'}
+                </span>
+                ${isTeacherMonitor ? `
+                  <span class="h-7 px-3 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black inline-flex items-center">
+                    🔑 교사용 정답 미리보기: ${q.type === 'OX' ? q.options[q.answerIndex] : `${q.answerIndex + 1}번 (${q.options[q.answerIndex]})`}
+                  </span>
+                ` : `
+                  <span class="h-7 px-3 rounded-xl bg-indigo-100 text-indigo-900 text-xs font-black inline-flex items-center">
+                    📺 학생용 대형 화면 (정답 비공개)
+                  </span>
+                `}
+              </div>
+              ${isTeacherMonitor ? `
+                <div class="flex items-center gap-1.5">
+                  <button onclick="openStudentWindow()" class="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">학생용 새 창 띄우기</button>
+                  <button onclick="navigate('home')" class="h-8 px-3.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-extrabold">수업 종료</button>
+                </div>
+              ` : ''}
+            </div>
+
+            <h2 class="text-lg sm:text-2xl font-black ${g.theme === 'cyber' ? 'text-white' : 'text-slate-900'}">
+              ${phase === 'ready' ? (isTeacherMonitor ? '교사 조작 리모컨에서 [문제 제시] 버튼을 누르면 학생 화면에 문제가 공개됩니다.' : '잠시 후 선생님이 문제를 제시합니다. 준비해 주세요!') : escapeHtml(q.question)}
+            </h2>
+
+            ${phase !== 'ready' ? `
+              <div class="grid grid-cols-2 sm:grid-cols-${q.options.length} gap-2">
+                ${q.options.map((opt, idx) => {
+                  const isCorrect = (isRevealed || isTeacherMonitor) && q.answerIndex === idx;
+                  const teacherHintOnly = isTeacherMonitor && !isRevealed && q.answerIndex === idx;
+                  return `
+                    <div class="p-3 rounded-2xl border text-xs sm:text-sm font-extrabold flex items-center justify-between gap-2 ${
+                      isRevealed && q.answerIndex === idx
+                        ? 'bg-emerald-600 text-white border-emerald-500 shadow'
+                        : teacherHintOnly
+                          ? 'bg-amber-50 text-amber-950 border-amber-400 ring-2 ring-amber-200'
+                          : (g.theme === 'cyber' ? 'bg-indigo-900/80 text-cyan-100 border-cyan-500/40' : 'bg-white text-slate-800 border-slate-200')
+                    }">
+                      <span>${q.type === 'OX' ? '' : `${idx + 1}번. `}${escapeHtml(opt)}</span>
+                      ${teacherHintOnly ? '<span class="px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-black shrink-0">교사 정답</span>' : ''}
+                      ${isRevealed && q.answerIndex === idx ? '<span class="px-2 py-0.5 rounded bg-white text-emerald-700 text-[10px] font-black shrink-0">정답</span>' : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : ''}
+
+            ${(isRevealed || isTeacherMonitor) && q.explanation ? `
+              <div class="p-3 rounded-2xl ${isRevealed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-950'} border text-xs font-bold">
+                💡 ${isRevealed ? '해설' : '교사용 해설 미리보기'}: ${escapeHtml(q.explanation)}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 카메라 & 머리 위 공중 플로팅 뱃지 캔버스 영역 -->
+          <div id="play-stage-box" class="relative w-full ${isStudentDisplayMode ? 'h-[72vh]' : 'h-[58vh]'} min-h-[400px] rounded-3xl overflow-hidden border-2 border-slate-300 bg-slate-900 shadow-lg select-none">
+            <video id="game-video" playsinline muted class="hidden"></video>
+            <canvas id="game-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+            <!-- 패자부활전 / 전원 탈락 규칙 / 최종 우승 투명 카메라 오버레이 대형 텍스트 -->
+            ${(phase === 'revival_intro' || phase === 'all_eliminated_alert' || phase === 'finished') ? `
+              <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center px-6 text-center z-20 ${phase === 'revival_intro' ? 'animate-revival-overlay' : ''}">
+                <div class="text-4xl sm:text-7xl font-black tracking-tight text-amber-300 drop-shadow-[0_6px_18px_rgba(0,0,0,0.95)]" style="-webkit-text-stroke: 2px #0f172a;">
+                  ${escapeHtml(g.specialBannerText)}
+                </div>
+                <div class="mt-3 text-base sm:text-2xl font-black text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.95)] max-w-3xl">
+                  ${escapeHtml(g.specialBannerSub)}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- 교사 화면에서만 표시되는 드래그 및 투명도 조절 교사 조작 리모컨(HUD) -->
+            ${isTeacherMonitor ? `
+            <div
+              id="teacher-control-hud"
+              style="${hudStyle}"
+              class="absolute z-30 w-[290px] sm:w-[320px] rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/20 text-white shadow-2xl p-3 space-y-2.5"
+            >
+              <div id="teacher-hud-drag-handle" class="cursor-move flex items-center justify-between gap-2 pb-2 border-b border-white/15">
+                <span class="text-[11px] font-black text-amber-300 flex items-center gap-1">
+                  ⠿ 교사 조작 리모컨 (드래그 이동)
+                </span>
+                <div class="flex items-center gap-1.5" onpointerdown="event.stopPropagation()">
+                  <span class="text-[10px] text-slate-300 font-bold">투명도</span>
+                  <input
+                    type="range"
+                    min="0.25"
+                    max="1"
+                    step="0.05"
+                    value="${g.hudOpacity}"
+                    oninput="const v=Number(this.value); state.game.hudOpacity=v; document.getElementById('teacher-control-hud').style.opacity=v; saveUserGamePrefs();"
+                    class="w-16 accent-amber-400 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-1.5">
+                <button onclick="presentCurrentQuestion()" class="h-9 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                  ▶ 문제 제시
+                </button>
+                <button onclick="togglePauseGame()" class="h-9 px-2.5 rounded-xl ${g.paused ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 hover:bg-slate-700 text-white'} text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                  ${g.paused ? '▶ 카운트 재개' : '⏸ 일시정지'}
+                </button>
+                <button onclick="revealCurrentAnswer()" class="h-9 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                  ✓ 정답 공개
+                </button>
+                <button onclick="goToNextQuestion()" class="h-9 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                  다음 문제 →
+                </button>
+              </div>
+
+              <button onclick="state.game.showLiveSettings=!state.game.showLiveSettings; render(); initCameraAndGameLoop();" class="w-full h-8 rounded-xl bg-white/10 hover:bg-white/15 text-[11px] font-extrabold text-slate-200 flex items-center justify-center">
+                ⚙ 실시간 진행 조건 조정 ${g.showLiveSettings ? '▲' : '▼'}
+              </button>
+
+              ${g.showLiveSettings ? `
+                <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-2 text-[11px]">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300 font-bold">풀이 시간</span>
+                    <div class="flex items-center gap-1">
+                      <input type="number" min="5" max="90" value="${g.solveTimeSec}" onchange="updateGamePref('solveTimeSec', Math.max(5, Number(this.value)), false)" class="w-14 px-2 py-1 rounded bg-slate-800 border border-slate-600 text-white font-black text-center" />
+                      <span>초</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300 font-bold">카운트 소리 시작</span>
+                    <div class="flex items-center gap-1">
+                      <input type="number" min="0" max="20" value="${g.countdownSoundStartSec}" onchange="updateGamePref('countdownSoundStartSec', Math.max(0, Number(this.value)), false)" class="w-14 px-2 py-1 rounded bg-slate-800 border border-slate-600 text-white font-black text-center" />
+                      <span>초 전</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-300 font-bold">정답·이동 시간</span>
+                    <div class="flex items-center gap-1">
+                      <input type="number" min="2" max="60" value="${g.revealMoveTimeSec}" onchange="updateGamePref('revealMoveTimeSec', Math.max(2, Number(this.value)), false)" class="w-14 px-2 py-1 rounded bg-slate-800 border border-slate-600 text-white font-black text-center" />
+                      <span>초</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 pt-1 border-t border-white/10">
+                    <span class="text-slate-300 font-bold">문제 넘김</span>
+                    <button onclick="updateGamePref('autoAdvance', !state.game.autoAdvance, true); initCameraAndGameLoop();" class="px-2.5 py-1 rounded-lg font-extrabold ${g.autoAdvance ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-200'}">
+                      ${g.autoAdvance ? '자동 넘김' : '수동 넘김'}
+                    </button>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+            ` : ''}
+
+            <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+              <span class="px-3 py-1.5 rounded-xl bg-slate-950/75 text-white text-[11px] font-bold">
+                머리 위 공중 뱃지 표시 · 얇은 경계선(경고색/미선택) · 외곽 이탈(뱃지 깜빡임)
+              </span>
+              <span class="px-3 py-1.5 rounded-xl bg-slate-950/75 text-slate-200 text-[11px] font-bold">
+                학생 위치를 드래그해 경계선·이탈 경고를 테스트할 수 있습니다
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 10. 실시간 카메라·머리 위 공중 뱃지 & 게임 루프
+    // ==========================================
+    function stopCameraAndTimers() {
+      if (state.game.timerInterval) {
+        clearInterval(state.game.timerInterval);
+        state.game.timerInterval = null;
+      }
+      if (state.game.revivalTimeout) {
+        clearTimeout(state.game.revivalTimeout);
+        state.game.revivalTimeout = null;
+      }
+      if (state.game.animFrameId) {
+        cancelAnimationFrame(state.game.animFrameId);
+        state.game.animFrameId = null;
+      }
+      if (state.game.videoStream) {
+        state.game.videoStream.getTracks().forEach(t => t.stop());
+        state.game.videoStream = null;
+      }
+      state.game.cameraActive = false;
+    }
+
+    function startGameSession(quizId) {
+      if (quizId) state.selectedQuizId = quizId;
+      state.game.questionIndex = 0;
+      state.game.paused = false;
+      state.game.participants.forEach(p => { p.eliminated = false; });
+      state.game.timeLeft = state.game.solveTimeSec;
+      state.game.revealTimeLeft = state.game.revealMoveTimeSec;
+      navigate('play');
+      setTimeout(() => {
+        presentCurrentQuestion();
+      }, 60);
+    }
+
+    function openStudentWindow() {
+      broadcastLiveSyncState();
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'student');
+      const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
+      if (popup) {
+        showToast('학생용 전용 창이 열렸습니다! 학생 화면에는 정답과 해설이 숨겨집니다.', 'success');
+      } else {
+        showToast('팝업 차단이 설정되어 있습니다. 브라우저 주소창 우측에서 팝업을 허용해 주세요.', 'warning');
+      }
+    }
+
+    function detectFacesOnVideoFrame(video) {
+      if (!state.game.cameraActive || !video || video.readyState < 2) return;
+      const now = performance.now();
+      if (state.game.detectBusy || now - state.game.lastDetectAt < 120) return;
+      state.game.lastDetectAt = now;
+
+      if ('FaceDetector' in window) {
+        if (!state.game.faceDetector) {
+          try {
+            state.game.faceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 25 });
+          } catch (e) {
+            state.game.faceDetector = null;
+          }
+        }
+        if (state.game.faceDetector) {
+          state.game.detectBusy = true;
+          state.game.faceDetector.detect(video).then(faces => {
+            const vw = video.videoWidth || 640;
+            const vh = video.videoHeight || 480;
+            state.game.detectedHeads = (faces || []).map((f, idx) => {
+              const box = f.boundingBox;
+              let cx = (box.x + box.width / 2) / vw;
+              if (state.game.mirrorCamera) cx = 1 - cx;
+              const cy = (box.y + box.height / 2) / vh;
+              const hr = Math.max(0.035, (box.height / vh) * 0.55);
+              return {
+                id: `cam_face_${idx}`,
+                label: `참가자 ${idx + 1}`,
+                x: Math.min(0.98, Math.max(0.02, cx)),
+                y: Math.min(0.95, Math.max(0.05, cy)),
+                headRadius: hr,
+                eliminated: false,
+                status: 'selected',
+                choiceIndex: 0,
+                choiceText: ''
+              };
+            });
+          }).catch(() => {}).finally(() => {
+            state.game.detectBusy = false;
+          });
+          return;
+        }
+      }
+
+      // FaceDetector 미지원 브라우저용 피부색·상반신 클러스터 기반 실시간 위치 추정
+      try {
+        if (!state.game._offCanvas) {
+          state.game._offCanvas = document.createElement('canvas');
+          state.game._offCanvas.width = 96;
+          state.game._offCanvas.height = 72;
+        }
+        const oc = state.game._offCanvas;
+        const octx = oc.getContext('2d', { willReadFrequently: true });
+        octx.drawImage(video, 0, 0, 96, 72);
+        const imgData = octx.getImageData(0, 0, 96, 72).data;
+        const cols = new Array(96).fill(null).map(() => ({ count: 0, sumY: 0, minY: 72 }));
+        for (let y = 4; y < 68; y++) {
+          for (let x = 2; x < 94; x++) {
+            const i = (y * 96 + x) * 4;
+            const r = imgData[i], g = imgData[i + 1], b = imgData[i + 2];
+            const isSkin = r > 85 && g > 40 && b > 20 && r > g && r > b && Math.abs(r - g) > 12;
+            if (isSkin) {
+              cols[x].count++;
+              cols[x].sumY += y;
+              if (y < cols[x].minY) cols[x].minY = y;
+            }
+          }
+        }
+        const heads = [];
+        let clusterStart = -1;
+        for (let x = 2; x <= 94; x++) {
+          const active = x < 94 && cols[x].count >= 4;
+          if (active && clusterStart === -1) clusterStart = x;
+          if (!active && clusterStart !== -1) {
+            const width = x - clusterStart;
+            if (width >= 3) {
+              let totalWeight = 0, weightedX = 0, topY = 72;
+              for (let cx = clusterStart; cx < x; cx++) {
+                totalWeight += cols[cx].count;
+                weightedX += cx * cols[cx].count;
+                if (cols[cx].minY < topY) topY = cols[cx].minY;
+              }
+              let normX = (weightedX / totalWeight) / 96;
+              if (state.game.mirrorCamera) normX = 1 - normX;
+              const normY = Math.min(0.88, Math.max(0.12, (topY + width * 0.55) / 72));
+              heads.push({
+                id: `cam_skin_${heads.length}`,
+                label: `참가자 ${heads.length + 1}`,
+                x: normX,
+                y: normY,
+                headRadius: Math.max(0.04, (width / 96) * 0.65),
+                eliminated: false,
+                status: 'selected',
+                choiceIndex: 0,
+                choiceText: ''
+              });
+            }
+            clusterStart = -1;
+          }
+        }
+        state.game.detectedHeads = heads;
+      } catch (e) {}
+    }
+
+    function evaluateParticipantZone(p, optionCount) {
+      const margin = state.game.activeMarginRatio;
+      const halfBound = state.game.boundaryWidthRatio / 2;
+
+      if (p.x < margin || p.x > 1 - margin || p.y < margin || p.y > 1 - margin) {
+        p.status = 'outside';
+        p.choiceIndex = -1;
+        p.choiceText = '영역 이탈!';
+        return;
+      }
+
+      const activeSize = 1 - margin * 2;
+      const relX = (p.x - margin) / activeSize;
+      const relY = (p.y - margin) / activeSize;
+
+      // 4지선다 2x2 사분면 배치 판정
+      if (optionCount === 4 && state.game.choice4Layout === 'grid2x2') {
+        const halfNorm = halfBound / activeSize;
+        if (Math.abs(relX - 0.5) <= halfNorm || Math.abs(relY - 0.5) <= halfNorm) {
+          p.status = 'boundary';
+          p.choiceIndex = -1;
+          p.choiceText = '경계선(미선택)';
+          return;
+        }
+        const col = relX < 0.5 ? 0 : 1;
+        const row = relY < 0.5 ? 0 : 1;
+        const idx = row * 2 + col;
+        p.status = 'selected';
+        p.choiceIndex = idx;
+        p.choiceText = `${idx + 1}번 선택`;
+        return;
+      }
+
+      // 가로 분할 판정 (OX 2구역 또는 4지선다 가로 4구역)
+      const zoneWidth = 1 / optionCount;
+      for (let i = 1; i < optionCount; i++) {
+        const boundaryPos = i * zoneWidth;
+        if (Math.abs(relX - boundaryPos) <= halfBound / activeSize) {
+          p.status = 'boundary';
+          p.choiceIndex = -1;
+          p.choiceText = '경계선(미선택)';
+          return;
+        }
+      }
+
+      const idx = Math.min(optionCount - 1, Math.max(0, Math.floor(relX / zoneWidth)));
+      p.status = 'selected';
+      p.choiceIndex = idx;
+      p.choiceText = optionCount === 2 ? (idx === 0 ? 'O 선택' : 'X 선택') : `${idx + 1}번 선택`;
+    }
+
+    function renderStageCanvasFrame(canvas, video, optCount, correctAnswerIndex = -1, isRevealed = false) {
+      const rect = canvas.getBoundingClientRect();
+      if (canvas.width !== Math.floor(rect.width) || canvas.height !== Math.floor(rect.height)) {
+        canvas.width = Math.floor(rect.width);
+        canvas.height = Math.floor(rect.height);
+      }
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const theme = THEME_CONFIGS[state.game.theme] || THEME_CONFIGS.classic;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 배경(웹캠 또는 테마별 교실 스테이지 배경)
+      if (state.game.cameraActive && video && video.readyState >= 2) {
+        ctx.save();
+        if (state.game.mirrorCamera) {
+          ctx.translate(w, 0);
+          ctx.scale(-1, 1);
+        }
+        ctx.drawImage(video, 0, 0, w, h);
+        ctx.restore();
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, theme.stageBgTop);
+        grad.addColorStop(1, theme.stageBgBottom);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      const marginX = w * state.game.activeMarginRatio;
+      const marginY = h * state.game.activeMarginRatio;
+      const activeW = w - marginX * 2;
+      const activeH = h - marginY * 2;
+      const boundPx = w * state.game.boundaryWidthRatio;
+      const is2x2 = optCount === 4 && state.game.choice4Layout === 'grid2x2';
+      const zoneColors = theme.zonePalette || [
+        'rgba(59, 130, 246, 0.18)',
+        'rgba(168, 85, 247, 0.18)',
+        'rgba(16, 185, 129, 0.18)',
+        'rgba(245, 158, 11, 0.18)'
+      ];
+
+      // 카메라가 켜져 있으면 실제 카메라에서 인식된 인물 목록만 사용하고, 꺼져 있을 때만 가상 학생 표시
+      if (state.game.cameraActive) {
+        detectFacesOnVideoFrame(video);
+      }
+      const activeList = state.game.cameraActive ? state.game.detectedHeads : state.game.participants;
+      activeList.forEach(p => evaluateParticipantZone(p, optCount));
+
+      // 외곽 이탈 경고 테두리
+      const hasOutside = activeList.some(p => p.status === 'outside');
+      ctx.strokeStyle = hasOutside ? 'rgba(244, 63, 94, 0.9)' : 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = hasOutside ? 6 : 2;
+      ctx.strokeRect(marginX, marginY, activeW, activeH);
+
+      const boundWarnCheck = (zx) => activeList.some(p => p.status === 'boundary' && Math.abs(p.x * w - zx) < boundPx * 2.5);
+      const anyBoundaryCheck = () => activeList.some(p => p.status === 'boundary');
+
+      if (is2x2) {
+        const halfW = activeW / 2;
+        const halfH = activeH / 2;
+        for (let r = 0; r < 2; r++) {
+          for (let c = 0; c < 2; c++) {
+            const idx = r * 2 + c;
+            const zx = marginX + c * halfW;
+            const zy = marginY + r * halfH;
+            ctx.fillStyle = zoneColors[idx % zoneColors.length];
+            ctx.fillRect(zx, zy, halfW, halfH);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = '900 17px "Noto Sans KR", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${idx + 1}번 구역`, zx + halfW / 2, zy + 28);
+          }
+        }
+        const hasBound = anyBoundaryCheck();
+        ctx.fillStyle = hasBound ? 'rgba(245, 158, 11, 0.88)' : 'rgba(255, 255, 255, 0.55)';
+        ctx.fillRect(marginX + halfW - boundPx / 2, marginY, boundPx, activeH);
+        ctx.fillRect(marginX, marginY + halfH - boundPx / 2, activeW, boundPx);
+      } else {
+        const zoneW = activeW / optCount;
+        for (let i = 0; i < optCount; i++) {
+          const zx = marginX + i * zoneW;
+          ctx.fillStyle = zoneColors[i % zoneColors.length];
+          ctx.fillRect(zx, marginY, zoneW, activeH);
+
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.font = '900 17px "Noto Sans KR", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(optCount === 2 ? (i === 0 ? 'O 구역' : 'X 구역') : `${i + 1}번 구역`, zx + zoneW / 2, marginY + 28);
+
+          if (i > 0) {
+            const hasBoundaryPerson = boundWarnCheck(zx);
+            ctx.fillStyle = hasBoundaryPerson ? 'rgba(245, 158, 11, 0.88)' : 'rgba(255, 255, 255, 0.55)';
+            ctx.fillRect(zx - boundPx / 2, marginY, boundPx, activeH);
+          }
+        }
+      }
+
+      // 참가자 및 머리 위 공중 플로팅 뱃지 렌더링
+      const now = Date.now();
+      for (const p of activeList) {
+        evaluateParticipantZone(p, optCount);
+        const px = p.x * w;
+        const py = p.y * h;
+        const headR = Math.max(20, w * p.headRadius);
+
+        if (!state.game.cameraActive) {
+          ctx.beginPath();
+          ctx.arc(px, py, headR, 0, Math.PI * 2);
+          ctx.fillStyle = p.eliminated ? 'rgba(100,116,139,0.2)' : 'rgba(255,255,255,0.22)';
+          ctx.fill();
+          ctx.strokeStyle = p.eliminated ? 'rgba(148,163,184,0.4)' : 'rgba(255,255,255,0.6)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = p.eliminated ? '#94a3b8' : '#f8fafc';
+          ctx.font = '700 11px "Noto Sans KR", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.eliminated ? `${p.label}(탈락)` : p.label, px, py + 4);
+        }
+
+        const headTopY = py - headR;
+        const badgeY = Math.max(36, headTopY - (state.game.headBadgeOffsetPx || 36));
+        const isBlinkHidden = p.status === 'outside' && Math.floor(now / 260) % 2 === 1;
+
+        if (!isBlinkHidden) {
+          let badgeBg = '#2563eb';
+          if (p.eliminated) badgeBg = '#475569';
+          else if (p.status === 'boundary') badgeBg = '#d97706';
+          else if (p.status === 'outside') badgeBg = '#e11d48';
+          else if (isRevealed && correctAnswerIndex >= 0) {
+            badgeBg = p.choiceIndex === correctAnswerIndex ? '#059669' : '#64748b';
+          }
+
+          const badgeText = p.eliminated ? '탈락(대기)' : p.choiceText;
+          ctx.font = '900 13px "Noto Sans KR", sans-serif';
+          const textW = ctx.measureText(badgeText).width;
+          const pillW = textW + 24;
+          const pillH = 28;
+
+          ctx.beginPath();
+          ctx.moveTo(px, headTopY - 4);
+          ctx.lineTo(px, badgeY + pillH / 2);
+          ctx.strokeStyle = badgeBg;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = badgeBg;
+          ctx.beginPath();
+          ctx.roundRect(px - pillW / 2, badgeY - pillH / 2, pillW, pillH, 14);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(badgeText, px, badgeY);
+        }
+      }
+    }
+
+    function attachParticipantDragHandlers(canvas) {
+      let draggingParticipant = null;
+      const getNormCoords = (clientX, clientY) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: Math.min(0.99, Math.max(0.01, (clientX - rect.left) / rect.width)),
+          y: Math.min(0.95, Math.max(0.08, (clientY - rect.top) / rect.height))
+        };
+      };
+      canvas.onpointerdown = (e) => {
+        const pos = getNormCoords(e.clientX, e.clientY);
+        for (const p of state.game.participants) {
+          if (Math.hypot(p.x - pos.x, p.y - pos.y) < 0.1) {
+            draggingParticipant = p;
+            break;
+          }
+        }
+      };
+      canvas.onpointermove = (e) => {
+        if (!draggingParticipant) return;
+        const pos = getNormCoords(e.clientX, e.clientY);
+        draggingParticipant.x = pos.x;
+        draggingParticipant.y = pos.y;
+      };
+      canvas.onpointerup = () => { draggingParticipant = null; };
+    }
+
+    async function toggleSettingsPreviewCamera() {
+      if (state.game.cameraActive) {
+        stopCameraAndTimers();
+        render();
+        initSettingsCameraPreview();
+        return;
+      }
+      if (navigator.mediaDevices?.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+          state.game.videoStream = stream;
+          state.game.cameraActive = true;
+          render();
+          initSettingsCameraPreview();
+          showToast('설정 미리보기 카메라가 켜졌습니다.', 'success');
+        } catch (err) {
+          showToast('카메라 권한을 확인할 수 없어 시뮬레이터 모드로 표시됩니다.', 'warning');
+        }
+      }
+    }
+
+    async function initSettingsCameraPreview() {
+      const canvas = document.getElementById('settings-preview-canvas');
+      const video = document.getElementById('settings-preview-video');
+      if (!canvas) return;
+      if (state.game.cameraActive && state.game.videoStream && video) {
+        video.srcObject = state.game.videoStream;
+        try { await video.play(); } catch (e) {}
+      }
+      attachParticipantDragHandlers(canvas);
+
+      // 설정 미리보기 내 교사 조작 리모컨 드래그
+      const sHud = document.getElementById('settings-hud-preview');
+      const sHandle = document.getElementById('settings-hud-drag-handle');
+      const sBox = document.getElementById('settings-preview-box');
+      if (sHud && sHandle && sBox) {
+        let dragOff = null;
+        sHandle.onpointerdown = (e) => {
+          const r = sHud.getBoundingClientRect();
+          dragOff = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+          sHandle.setPointerCapture?.(e.pointerId);
+        };
+        sHandle.onpointermove = (e) => {
+          if (!dragOff) return;
+          const br = sBox.getBoundingClientRect();
+          const nx = Math.min(Math.max(8, br.width - sHud.offsetWidth - 8), Math.max(8, e.clientX - br.left - dragOff.dx));
+          const ny = Math.min(Math.max(8, br.height - sHud.offsetHeight - 8), Math.max(8, e.clientY - br.top - dragOff.dy));
+          sHud.style.right = 'auto';
+          sHud.style.left = `${nx}px`;
+          sHud.style.top = `${ny}px`;
+          state.game.hudX = Math.round(nx);
+          state.game.hudY = Math.round(ny);
+        };
+        sHandle.onpointerup = () => {
+          if (dragOff) {
+            dragOff = null;
+            saveUserGamePrefs();
+          }
+        };
+      }
+
+      if (state.game.animFrameId) cancelAnimationFrame(state.game.animFrameId);
+      const previewLoop = () => {
+        if (state.route !== 'settings' || state.settingsTab !== 'camera') return;
+        const optCount = state.settingsPreviewMode === 'OX' ? 2 : 4;
+        renderStageCanvasFrame(canvas, video, optCount, -1, false);
+        state.game.animFrameId = requestAnimationFrame(previewLoop);
+      };
+      state.game.animFrameId = requestAnimationFrame(previewLoop);
+    }
+
+    async function initCameraAndGameLoop() {
+      const canvas = document.getElementById('game-canvas');
+      const video = document.getElementById('game-video');
+      if (!canvas) return;
+
+      if (!state.game.cameraActive && navigator.mediaDevices?.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+          state.game.videoStream = stream;
+          state.game.cameraActive = true;
+          if (video) {
+            video.srcObject = stream;
+            await video.play();
+          }
+        } catch (err) {
+          state.game.cameraActive = false;
+        }
+      }
+
+      if (state.game.timerInterval) clearInterval(state.game.timerInterval);
+      state.game.timerInterval = setInterval(() => {
+        if (state.route !== 'play' || state.game.paused) return;
+        const badge = document.getElementById('game-timer-badge');
+
+        if (state.game.phase === 'answering') {
+          if (state.game.timeLeft > 0) {
+            state.game.timeLeft -= 1;
+            if (state.game.timeLeft > 0 && state.game.timeLeft <= state.game.countdownSoundStartSec) {
+              playToneBeep(state.game.timeLeft <= 3 ? 1046.5 : 784, 0.1, 'sine');
+            }
+            if (badge) badge.textContent = `남은 시간 ${state.game.timeLeft}초`;
+          } else {
+            revealCurrentAnswer();
+          }
+        } else if ((state.game.phase === 'revealed' || state.game.phase === 'all_eliminated_alert') && state.game.autoAdvance) {
+          if (state.game.revealTimeLeft > 0) {
+            state.game.revealTimeLeft -= 1;
+            if (badge) badge.textContent = `정답·이동 ${state.game.revealTimeLeft}초`;
+          } else {
+            goToNextQuestion();
+          }
+        }
+      }, 1000);
+
+      // 교사 조작 리모컨(HUD) 드래그 이동 처리
+      const hudEl = document.getElementById('teacher-control-hud');
+      const hudHandle = document.getElementById('teacher-hud-drag-handle');
+      const stageBox = document.getElementById('play-stage-box');
+      if (hudEl && hudHandle && stageBox) {
+        let hudDragOffset = null;
+        hudHandle.onpointerdown = (e) => {
+          const hudRect = hudEl.getBoundingClientRect();
+          hudDragOffset = {
+            dx: e.clientX - hudRect.left,
+            dy: e.clientY - hudRect.top
+          };
+          hudHandle.setPointerCapture?.(e.pointerId);
+        };
+        hudHandle.onpointermove = (e) => {
+          if (!hudDragOffset) return;
+          const boxRect = stageBox.getBoundingClientRect();
+          const maxX = Math.max(8, boxRect.width - hudEl.offsetWidth - 8);
+          const maxY = Math.max(8, boxRect.height - hudEl.offsetHeight - 8);
+          const nx = Math.min(maxX, Math.max(8, e.clientX - boxRect.left - hudDragOffset.dx));
+          const ny = Math.min(maxY, Math.max(8, e.clientY - boxRect.top - hudDragOffset.dy));
+          hudEl.style.right = 'auto';
+          hudEl.style.left = `${nx}px`;
+          hudEl.style.top = `${ny}px`;
+          state.game.hudX = Math.round(nx);
+          state.game.hudY = Math.round(ny);
+        };
+        hudHandle.onpointerup = () => {
+          if (hudDragOffset) {
+            hudDragOffset = null;
+            saveUserGamePrefs();
+          }
+        };
+      }
+
+      attachParticipantDragHandlers(canvas);
+
+      const drawLoop = () => {
+        if (state.route !== 'play') return;
+        const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
+        const questions = getActivePlayableQuestions(quiz);
+        const q = questions[state.game.questionIndex] || questions[0];
+        const isRev = state.game.phase === 'revealed' || state.game.phase === 'finished';
+        renderStageCanvasFrame(canvas, video, q.options.length, q.answerIndex, isRev);
+        state.game.animFrameId = requestAnimationFrame(drawLoop);
+      };
+
+      state.game.animFrameId = requestAnimationFrame(drawLoop);
+    }
+
+    function render() {
+      applyActiveThemeToDocument();
+      broadcastLiveSyncState();
+      renderAuthQuotaBar();
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const active = btn.getAttribute('data-nav') === state.route;
+        btn.className = active
+          ? 'nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition bg-blue-600 text-white shadow-sm'
+          : 'nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition bg-slate-100 hover:bg-slate-200 text-slate-700';
+      });
+
+      const main = document.getElementById('app-main');
+      if (!main) return;
+
+      if (state.route === 'home') main.innerHTML = renderHomeScreen();
+      else if (state.route === 'library') main.innerHTML = renderLibraryScreen();
+      else if (state.route === 'creator') main.innerHTML = renderCreatorScreen();
+      else if (state.route === 'settings') main.innerHTML = renderSettingsScreen();
+      else if (state.route === 'play') main.innerHTML = renderPlayScreen();
+
+      renderModal();
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'mq_live_student_sync' && isStudentDisplayMode) {
+        syncFromTeacherWindow();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPersistedData();
+      if (isStudentDisplayMode) {
+        syncFromTeacherWindow();
+        setTimeout(() => initCameraAndGameLoop(), 80);
+      } else {
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
