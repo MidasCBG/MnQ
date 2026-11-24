@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gowun+Dodum&family=Inter:wght@400;600;700;800;900&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gothic+A1:wght@400;500;600;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Gothic:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
 
     /* Scale rem-based typography, controls and spacing together on larger displays. */
@@ -93,7 +93,7 @@
     }
 
     body {
-      --reading-font: 'Inter', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+      --reading-font: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
       --display-font: 'Gowun Dodum';
       font-family: var(--reading-font);
       line-height: 1.5;
@@ -103,17 +103,14 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
     body.theme-roblox {
-      --display-font: 'Jua';
       background-color: #e0f2fe;
       color: #0c4a6e;
     }
     body.theme-pokemon {
-      --display-font: 'Do Hyeon';
       background-color: #fef2f2;
       color: #7f1d1d;
     }
     body.theme-cyber {
-      --display-font: 'Black Han Sans';
       background-color: #090d16;
       color: #f1f5f9;
     }
@@ -126,6 +123,7 @@
       letter-spacing:.025em;
       line-height:1.2;
     }
+    body.theme-pokemon :is(.font-medium, .font-semibold) { font-weight:700; }
     body.theme-cyber .theme-display-title { letter-spacing:.045em; }
     :is(#main-navbar, #modal-root, #toast-container, #app-main > .page-shell:not(.play-layout))
       :is([class~="text-[.625rem]"], [class~="text-[.6875rem]"]) {
@@ -284,10 +282,10 @@
           </div>
         </button>
 
-        <!-- 기리공작소 v1.2.4 고정 저작권 마크 -->
+        <!-- 기리공작소 v1.2.5 고정 저작권 마크 -->
         <div
           id="author-badge"
-          title="제작: 기리공작소 (Move & Quiz v1.2.4)"
+          title="제작: 기리공작소 (Move & Quiz v1.2.5)"
           class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 select-none"
         >
           <div id="author-avatar-box" class="w-6 h-6 rounded-full bg-white border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
@@ -299,7 +297,7 @@
             />
           </div>
           <span class="text-xs font-extrabold text-slate-700 whitespace-nowrap">기리공작소</span>
-          <span class="text-[.6875rem] font-bold text-slate-500 whitespace-nowrap">v1.2.4</span>
+          <span class="text-[.6875rem] font-bold text-slate-500 whitespace-nowrap">v1.2.5</span>
         </div>
       </div>
 
@@ -426,7 +424,8 @@
         id: 'roblox',
         name: '로블록스 오비형',
         en: 'Roblox Style',
-        fontName: 'Jua (둥근 블록 게임체)',
+        displayFont: 'Jua',
+        readingFont: 'Gothic A1',
         desc: '블록 스터드 감성과 경쾌한 오비 스테이지 UI',
         badge: '🟩 OBBY STAGE',
         stageBgTop: '#0284c7',
@@ -441,7 +440,8 @@
         id: 'pokemon',
         name: '포켓몬고 트레이너형',
         en: 'Pokemon GO',
-        fontName: 'Do Hyeon (역동적 배틀체)',
+        displayFont: 'Do Hyeon',
+        readingFont: 'Nanum Gothic',
         desc: '트레이너 배틀 스타디움 & 몬스터볼 게이지 감성',
         badge: '🔴 TRAINER ARENA',
         stageBgTop: '#065f46',
@@ -456,7 +456,8 @@
         id: 'cyber',
         name: '사이버 아케이드형',
         en: 'Cyber Arena',
-        fontName: 'Black Han Sans (강렬한 네온체)',
+        displayFont: 'Black Han Sans',
+        readingFont: 'IBM Plex Sans KR',
         desc: '네온 그리드와 미래형 아케이드 e스포츠 연출',
         badge: '⚡ CYBER ARENA',
         stageBgTop: '#1e1b4b',
@@ -471,7 +472,8 @@
         id: 'classic',
         name: '클래식 교실형',
         en: 'Clean Board',
-        fontName: 'Gowun Dodum (깔끔한 칠판 고딕체)',
+        displayFont: 'Gowun Dodum',
+        readingFont: 'Noto Sans KR',
         desc: '눈이 편안하고 가독성이 뛰어난 칠판·화이트보드형',
         badge: '📘 CLEAN BOARD',
         stageBgTop: '#1e293b',
@@ -569,11 +571,18 @@
       }
     };
 
+    function readingFontStack(theme) {
+      return `"${theme.readingFont}", "Noto Sans KR", "Malgun Gothic", sans-serif`;
+    }
+
     function applyActiveThemeToDocument() {
       const themeId = state.game?.theme || 'classic';
       const theme = THEME_CONFIGS[themeId] || THEME_CONFIGS.classic;
       document.body.classList.remove('theme-roblox', 'theme-pokemon', 'theme-cyber', 'theme-classic');
       document.body.classList.add(`theme-${theme.id}`);
+      document.body.style.setProperty('--reading-font', readingFontStack(theme));
+      document.body.style.setProperty('--display-font', `"${theme.displayFont}"`);
+      if (document.fonts) document.fonts.load(`700 1rem ${readingFontStack(theme)}`, '정답').catch(() => {});
 
       const navbar = document.getElementById('main-navbar');
       if (navbar) {
@@ -2120,7 +2129,7 @@
             <div class="rounded-3xl p-6 border shadow-sm space-y-5 ${activeTheme.panelClass}">
               <div>
                 <h3 class="text-base font-black">학생 선호 맞춤형 디자인 테마 선택</h3>
-                <p class="text-xs opacity-75 mt-0.5">테마를 선택하면 색상, 배경, 큰 제목의 글꼴이 바뀝니다.</p>
+                <p class="text-xs opacity-75 mt-0.5">테마를 선택하면 제목과 본문 글꼴, 색상, 배경이 바뀝니다.</p>
               </div>
               <div class="fluid-columns gap-4">
                 ${Object.values(THEME_CONFIGS).map(th => {
@@ -2133,7 +2142,7 @@
                       </div>
                       <div>
                         <div class="text-base font-bold leading-snug">${th.name} <span class="theme-card-english text-xs font-semibold">(${th.en})</span></div>
-                        <div class="text-xs font-semibold text-blue-600 mt-1">제목 글꼴 · ${th.fontName}</div>
+                        <div class="text-xs font-semibold text-blue-600 mt-1">제목 · ${th.displayFont}<br>본문 · ${th.readingFont}</div>
                         <p class="text-xs theme-card-copy mt-1">${th.desc}</p>
                       </div>
                       <div class="flex gap-1.5 pt-1">
@@ -2720,7 +2729,7 @@
       unlockGameAudio();
       const url = new URL(window.location.href);
       url.searchParams.set('view', 'student');
-      url.searchParams.set('ui', '1.2.4');
+      url.searchParams.set('ui', '1.2.5');
       const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
       if (!popup) {
         showToast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.', 'warning');
@@ -2910,6 +2919,7 @@
       const h = canvas.height;
       const theme = THEME_CONFIGS[state.game.theme] || THEME_CONFIGS.classic;
 
+      const canvasFont = readingFontStack(theme);
       ctx.clearRect(0, 0, w, h);
 
       // 배경(웹캠 또는 테마별 교실 스테이지 배경)
@@ -2974,11 +2984,11 @@
         const size = Math.min(180, width * .48, height * (is2x2 ? .28 : .56));
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = `900 ${size}px "Noto Sans KR", sans-serif`;
+        ctx.font = `700 ${size}px ${canvasFont}`;
         ctx.fillStyle = correct ? 'rgba(236,253,245,.88)' : 'rgba(255,255,255,.29)';
         ctx.fillText(label, x + width / 2, y + height / 2);
         if (correct) {
-          ctx.font = '900 22px "Noto Sans KR", sans-serif';
+          ctx.font = `700 22px ${canvasFont}`;
           ctx.fillStyle = '#ecfdf5';
           ctx.fillText('✓ 정답', x + width / 2, y + 25);
         }
@@ -3031,7 +3041,7 @@
           ctx.stroke();
 
           ctx.fillStyle = p.eliminated ? '#94a3b8' : '#f8fafc';
-          ctx.font = '700 11px "Noto Sans KR", sans-serif';
+          ctx.font = `700 11px ${canvasFont}`;
           ctx.textAlign = 'center';
           ctx.fillText(p.eliminated ? `${p.label}(탈락)` : p.label, px, py + 4);
         }
@@ -3049,7 +3059,7 @@
           }
 
           const badgeText = p.eliminated ? '탈락(대기)' : p.choiceText;
-          ctx.font = '900 13px "Noto Sans KR", sans-serif';
+          ctx.font = `700 13px ${canvasFont}`;
           const textW = ctx.measureText(badgeText).width;
           const pillW = textW + 24;
           const pillH = 28;
