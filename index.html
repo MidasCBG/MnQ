@@ -255,10 +255,10 @@
           </div>
         </button>
 
-        <!-- 기리공작소 v1.2.1 고정 저작권 마크 -->
+        <!-- 기리공작소 v1.2.2 고정 저작권 마크 -->
         <div
           id="author-badge"
-          title="제작: 기리공작소 (Move & Quiz v1.2.1)"
+          title="제작: 기리공작소 (Move & Quiz v1.2.2)"
           class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 select-none"
         >
           <div id="author-avatar-box" class="w-6 h-6 rounded-full bg-white border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
@@ -270,7 +270,7 @@
             />
           </div>
           <span class="text-xs font-extrabold text-slate-700 whitespace-nowrap">기리공작소</span>
-          <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap">v1.2.1</span>
+          <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap">v1.2.2</span>
         </div>
       </div>
 
@@ -386,7 +386,7 @@
       mirrorCamera: true,
       boundaryWidthRatio: 0.035,
       activeMarginRatio: 0.05,
-      headBadgeOffsetPx: 36,
+      headBadgeGapPx: 6,
       hudOpacity: 0.92,
       hudX: null,
       hudY: null
@@ -565,7 +565,7 @@
       }
       const game = Object.fromEntries([
         'theme', 'targetSurvivors', 'choice4Layout', 'solveTimeSec', 'revealMoveTimeSec',
-        'mirrorCamera', 'boundaryWidthRatio', 'activeMarginRatio', 'headBadgeOffsetPx', 'hudOpacity',
+        'mirrorCamera', 'boundaryWidthRatio', 'activeMarginRatio', 'headBadgeGapPx', 'hudOpacity',
         'questionIndex', 'phase', 'paused', 'timeLeft', 'revealTimeLeft', 'readingTimeLeft',
         'specialBannerText', 'specialBannerSub', 'participants', 'autoAdvance', 'countdownSoundStartSec',
         'enableRevival'
@@ -629,6 +629,22 @@
       }
     }
 
+    function formatSliderValue(key, value) {
+      if (key === 'countdownSoundStartSec') return value === 0 ? '소리 끔' : '종료 ' + value + '초 전부터';
+      if (key === 'boundaryWidthRatio') return Math.round(value * 1000) / 10 + '%';
+      if (key === 'headBadgeGapPx') return value + 'px';
+      return value + '초';
+    }
+
+    function updateSettingsSlider(input) {
+      const key = input.dataset.setting;
+      const value = Number(input.value);
+      updateGamePref(key, value, false);
+      for (const output of input.parentElement.querySelectorAll('[data-slider-value]')) {
+        output.textContent = formatSliderValue(key, value);
+      }
+    }
+
     function getUserPrefsStorageKey() {
       const email = state.auth?.isLoggedIn && state.auth?.user?.email
         ? state.auth.user.email.toLowerCase().trim()
@@ -650,7 +666,11 @@
       try {
         const raw = localStorage.getItem(getUserPrefsStorageKey());
         const saved = raw ? JSON.parse(raw) : {};
-        Object.assign(state.game, JSON.parse(JSON.stringify(DEFAULT_USER_PREFS)), saved);
+        const { headBadgeOffsetPx: previousOffset, ...prefs } = saved;
+        if (prefs.headBadgeGapPx === undefined && Number.isFinite(previousOffset) && previousOffset !== 36) {
+          prefs.headBadgeGapPx = Math.min(66, Math.max(0, previousOffset - 14));
+        }
+        Object.assign(state.game, JSON.parse(JSON.stringify(DEFAULT_USER_PREFS)), prefs);
         state.game.timeLeft = Number(state.game.solveTimeSec) || 15;
         state.game.revealTimeLeft = Number(state.game.revealMoveTimeSec) || 7;
       } catch (e) {
@@ -2128,23 +2148,23 @@
                   <div class="space-y-1">
                     <div class="flex justify-between text-xs font-extrabold">
                       <span>문제 풀이 제한 시간</span>
-                      <span class="text-blue-600">${g.solveTimeSec}초</span>
+                      <span class="text-blue-600" data-slider-value>${formatSliderValue('solveTimeSec', g.solveTimeSec)}</span>
                     </div>
-                    <input type="range" min="5" max="60" step="1" value="${g.solveTimeSec}" oninput="updateGamePref('solveTimeSec', Number(this.value))" class="w-full" />
+                    <input type="range" min="5" max="60" step="1" value="${g.solveTimeSec}" data-setting="solveTimeSec" aria-label="문제 풀이 제한 시간" oninput="updateSettingsSlider(this)" class="w-full" />
                   </div>
                   <div class="space-y-1 pt-2 border-t border-slate-100">
                     <div class="flex justify-between text-xs font-extrabold">
                       <span>카운트다운 효과음 시작 시점</span>
-                      <span class="text-blue-600">${g.countdownSoundStartSec === 0 ? '소리 끔' : `종료 ${g.countdownSoundStartSec}초 전부터`}</span>
+                      <span class="text-blue-600" data-slider-value>${formatSliderValue('countdownSoundStartSec', g.countdownSoundStartSec)}</span>
                     </div>
-                    <input type="range" min="0" max="15" step="1" value="${g.countdownSoundStartSec}" oninput="updateGamePref('countdownSoundStartSec', Number(this.value))" class="w-full" />
+                    <input type="range" min="0" max="15" step="1" value="${g.countdownSoundStartSec}" data-setting="countdownSoundStartSec" aria-label="카운트다운 효과음 시작 시점" oninput="updateSettingsSlider(this)" class="w-full" />
                   </div>
                   <div class="space-y-1 pt-2 border-t border-slate-100">
                     <div class="flex justify-between text-xs font-extrabold">
                       <span>정답 확인 및 탈락자 이동 시간</span>
-                      <span class="text-blue-600">${g.revealMoveTimeSec}초</span>
+                      <span class="text-blue-600" data-slider-value>${formatSliderValue('revealMoveTimeSec', g.revealMoveTimeSec)}</span>
                     </div>
-                    <input type="range" min="3" max="30" step="1" value="${g.revealMoveTimeSec}" oninput="updateGamePref('revealMoveTimeSec', Number(this.value))" class="w-full" />
+                    <input type="range" min="3" max="30" step="1" value="${g.revealMoveTimeSec}" data-setting="revealMoveTimeSec" aria-label="정답 확인 및 탈락자 이동 시간" oninput="updateSettingsSlider(this)" class="w-full" />
                   </div>
                   <div class="setting-row flex items-center justify-between pt-2 border-t border-slate-100">
                     <span class="text-xs font-black text-slate-800">다음 문제 넘김</span>
@@ -2266,18 +2286,18 @@
                 <div class="space-y-1 pt-2 border-t border-slate-200/70">
                   <div class="flex justify-between text-xs font-extrabold">
                     <span>정답 구역 경계선 두께 (실시간 반영)</span>
-                    <span class="text-blue-600">${Math.round(g.boundaryWidthRatio * 1000) / 10}%</span>
+                    <span class="text-blue-600" data-slider-value>${formatSliderValue('boundaryWidthRatio', g.boundaryWidthRatio)}</span>
                   </div>
-                  <input type="range" min="0.015" max="0.08" step="0.005" value="${g.boundaryWidthRatio}" oninput="updateGamePref('boundaryWidthRatio', Number(this.value), false); document.getElementById('bound-val-label').textContent=(Math.round(Number(this.value)*1000)/10)+'%';" class="w-full" />
-                  <div class="text-[11px] opacity-75">현재 경계선 폭: <strong id="bound-val-label">${Math.round(g.boundaryWidthRatio * 1000) / 10}%</strong></div>
+                  <input type="range" min="0.015" max="0.08" step="0.005" value="${g.boundaryWidthRatio}" data-setting="boundaryWidthRatio" aria-label="정답 구역 경계선 두께" oninput="updateSettingsSlider(this)" class="w-full" />
+                  <div class="text-[11px] opacity-75">현재 경계선 폭: <strong data-slider-value>${formatSliderValue('boundaryWidthRatio', g.boundaryWidthRatio)}</strong></div>
                 </div>
 
                 <div class="space-y-1 pt-2 border-t border-slate-200/70">
                   <div class="flex justify-between text-xs font-extrabold">
-                    <span>머리 위 공중 뱃지 띄움 높이</span>
-                    <span class="text-blue-600">${g.headBadgeOffsetPx}px</span>
+                    <span>머리와 태그 사이 간격</span>
+                    <span class="text-blue-600" data-slider-value>${formatSliderValue('headBadgeGapPx', g.headBadgeGapPx)}</span>
                   </div>
-                  <input type="range" min="20" max="80" step="2" value="${g.headBadgeOffsetPx}" oninput="updateGamePref('headBadgeOffsetPx', Number(this.value), false)" class="w-full" />
+                  <input type="range" min="0" max="66" step="2" value="${g.headBadgeGapPx}" data-setting="headBadgeGapPx" aria-label="머리와 태그 사이 간격" oninput="updateSettingsSlider(this)" class="w-full" />
                 </div>
 
                 <div class="setting-row flex items-center justify-between pt-2 border-t border-slate-200/70">
@@ -2671,7 +2691,7 @@
       unlockGameAudio();
       const url = new URL(window.location.href);
       url.searchParams.set('view', 'student');
-      url.searchParams.set('ui', '1.2.1');
+      url.searchParams.set('ui', '1.2.2');
       const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
       if (!popup) {
         showToast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.', 'warning');
@@ -2987,8 +3007,7 @@
           ctx.fillText(p.eliminated ? `${p.label}(탈락)` : p.label, px, py + 4);
         }
 
-        const headTopY = py - headR;
-        const badgeY = Math.max(36, headTopY - (state.game.headBadgeOffsetPx || 36));
+        const headTopY = py - (state.game.cameraActive ? h * p.headRadius : headR);
         const isBlinkHidden = p.status === 'outside' && Math.floor(now / 260) % 2 === 1;
 
         if (!isBlinkHidden) {
@@ -3005,13 +3024,15 @@
           const textW = ctx.measureText(badgeText).width;
           const pillW = textW + 24;
           const pillH = 28;
-
-          ctx.beginPath();
-          ctx.moveTo(px, headTopY - 4);
-          ctx.lineTo(px, badgeY + pillH / 2);
-          ctx.strokeStyle = badgeBg;
-          ctx.lineWidth = 2;
-          ctx.stroke();
+          const badgeY = Math.max(pillH / 2 + 2, headTopY - pillH / 2 - state.game.headBadgeGapPx);
+          if (badgeY + pillH / 2 < headTopY) {
+            ctx.beginPath();
+            ctx.moveTo(px, headTopY);
+            ctx.lineTo(px, badgeY + pillH / 2);
+            ctx.strokeStyle = badgeBg;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
 
           ctx.fillStyle = badgeBg;
           ctx.beginPath();
