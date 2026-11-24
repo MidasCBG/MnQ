@@ -11,6 +11,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gowun+Dodum&family=Inter:wght@400;600;700;800;900&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <style>
+
+    .settings-nav { position:relative; display:inline-grid; place-items:center; }
+    .settings-nav::after { content:'설정'; position:absolute; z-index:45; top:100%; left:50%; transform:translateX(-50%); padding:.3rem .55rem; border-radius:.45rem; background:#0f172a; color:white; opacity:0; pointer-events:none; }
+    .settings-nav:hover::after, .settings-nav:focus-visible::after { opacity:1; }
+    .keep-word { white-space:nowrap; }
+    .home-intro { word-break:keep-all; overflow-wrap:break-word; }
+    .quiz-stage { height:calc(100vh - 10rem); height:calc(100dvh - 10rem); min-height:26rem; }
+    .student-stage { height:calc(100vh - 5rem); height:calc(100dvh - 5rem); }
+    .stage-question { max-width:min(88%, 68rem); padding:clamp(.65rem, 2vw, 1.5rem); border-radius:1.2rem; color:white; background:rgba(15,23,42,.94); font-size:clamp(1.35rem, 3.7vw, 4rem); line-height:1.25; text-wrap:pretty; word-break:keep-all; overflow-wrap:anywhere; max-height:100%; overflow:auto; transition:opacity .4s ease, background-color .4s ease, transform .4s ease; }
+    .stage-question.is-moving { opacity:.48; background:rgba(15,23,42,.62); transform:scale(.92); animation:question-fade .45s ease-out; }
+    @keyframes question-fade { from { opacity:1; transform:scale(1); } }
+    .move-cue { animation:move-cue-hide .25s 1.7s forwards; }
+    @keyframes move-cue-hide { to { opacity:0; visibility:hidden; } }
+    .stage-countdown { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:white; font-size:clamp(4rem, 13vw, 12rem); font-weight:900; line-height:1; -webkit-text-stroke:2px #0f172a; text-shadow:0 5px 18px #000; z-index:18; pointer-events:none; }
+    .stage-countdown[hidden] { display:none; }
+    .teacher-answer { min-height:calc(100dvh - 11rem); display:grid; place-content:center; text-align:center; overflow-wrap:anywhere; }
+    .teacher-answer strong { font-size:clamp(2.75rem,9vw,8rem); line-height:1.12; }
+    @media (prefers-reduced-motion:reduce) { .stage-question { transition:none; } .stage-question.is-moving { animation:none; } }
+
     body {
       font-family: 'Inter', 'Noto Sans KR', sans-serif;
       background-color: #f8fafc;
@@ -203,13 +222,13 @@
     </div>
 
     <!-- 메인 메뉴 탭 -->
-    <nav class="max-w-7xl mx-auto px-3 sm:px-6 pb-2.5 flex items-center gap-1.5 overflow-x-auto">
+    <nav class="max-w-7xl mx-auto px-3 sm:px-6 pb-2.5 flex flex-wrap items-center gap-1.5">
       <button onclick="navigate('home')" data-nav="home" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">홈</button>
       <button onclick="navigate('library')" data-nav="library" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">퀴즈 보관함</button>
       <button onclick="navigate('creator')" data-nav="creator" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">퀴즈 만들기</button>
-      <button onclick="navigate('settings')" data-nav="settings" class="nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition">카메라·판정 설정</button>
+      <button onclick="navigate('settings')" data-nav="settings" aria-label="설정" class="nav-btn settings-nav px-3.5 py-1.5 rounded-xl"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2h4l.7 2.6 2 .9 2.4-1.1 2.8 2.8-1.1 2.4.9 2 .3.1V14l-2.6.7-.9 2 1.1 2.4-2.8 2.8-2.4-1.1-2 .9L14 24h-4l-.7-2.6-2-.9-2.4 1.1-2.8-2.8 1.1-2.4-.9-2L0 14v-4l2.6-.7.9-2-1.1-2.4 2.8-2.8 2.4 1.1 2-.9z" transform="translate(2 1) scale(.83)"/><circle cx="12" cy="11" r="3"/></svg></button>
       <button onclick="openStudentWindow()" class="ml-auto px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold whitespace-nowrap shadow-sm transition">
-        학생용 화면 열기
+        학생용 새창 열기
       </button>
     </nav>
   </header>
@@ -381,6 +400,16 @@
 
     const isStudentDisplayMode = new URLSearchParams(window.location.search).get('view') === 'student';
 
+    let studentWindow = null;
+    let studentWindowWatch = null;
+    let cameraRequest = null;
+    let audioContext = null;
+    const questionReadSeconds = 3;
+
+    function hasStudentWindow() {
+      return !isStudentDisplayMode && studentWindow && !studentWindow.closed;
+    }
+
     const state = {
       route: isStudentDisplayMode ? 'play' : 'home', // 'home' | 'library' | 'creator' | 'settings' | 'play'
       settingsTab: 'theme', // 'theme' | 'rules' | 'camera'
@@ -429,6 +458,7 @@
       game: {
         ...JSON.parse(JSON.stringify(DEFAULT_USER_PREFS)),
         questionIndex: 0,
+        readingTimeLeft: 0,
         phase: 'answering', // 'ready' | 'revival_intro' | 'answering' | 'revealed' | 'all_eliminated_alert' | 'finished'
         paused: false,
         showLiveSettings: false,
@@ -469,50 +499,64 @@
       }
     }
 
-    function broadcastLiveSyncState() {
-      if (isStudentDisplayMode) return;
-      try {
-        const payload = {
-          ts: Date.now(),
-          selectedQuizId: state.selectedQuizId,
-          quizzes: state.quizzes,
-          game: {
-            theme: state.game.theme,
-            targetSurvivors: state.game.targetSurvivors,
-            choice4Layout: state.game.choice4Layout,
-            solveTimeSec: state.game.solveTimeSec,
-            revealMoveTimeSec: state.game.revealMoveTimeSec,
-            mirrorCamera: state.game.mirrorCamera,
-            boundaryWidthRatio: state.game.boundaryWidthRatio,
-            activeMarginRatio: state.game.activeMarginRatio,
-            headBadgeOffsetPx: state.game.headBadgeOffsetPx,
-            questionIndex: state.game.questionIndex,
-            phase: state.game.phase,
-            paused: state.game.paused,
-            timeLeft: state.game.timeLeft,
-            revealTimeLeft: state.game.revealTimeLeft,
-            specialBannerText: state.game.specialBannerText,
-            specialBannerSub: state.game.specialBannerSub
-          }
-        };
-        localStorage.setItem('mq_live_student_sync', JSON.stringify(payload));
-      } catch (e) {}
+    function broadcastLiveSyncState(timerOnly = false) {
+      if (!hasStudentWindow()) return;
+      const g = state.game;
+      if (timerOnly) {
+        studentWindow.postMessage({ type:'mq-timer', timeLeft:g.timeLeft, revealTimeLeft:g.revealTimeLeft, readingTimeLeft:g.readingTimeLeft }, location.origin);
+        return;
+      }
+      const game = Object.fromEntries([
+        'theme', 'targetSurvivors', 'choice4Layout', 'solveTimeSec', 'revealMoveTimeSec',
+        'mirrorCamera', 'boundaryWidthRatio', 'activeMarginRatio', 'headBadgeOffsetPx', 'hudOpacity',
+        'questionIndex', 'phase', 'paused', 'timeLeft', 'revealTimeLeft', 'readingTimeLeft',
+        'specialBannerText', 'specialBannerSub', 'participants', 'autoAdvance', 'countdownSoundStartSec',
+        'enableRevival'
+      ].map(key => [key, g[key]]));
+      studentWindow.postMessage({ type:'mq-state', route:state.route, selectedQuizId:state.selectedQuizId, quizzes:state.quizzes, game }, location.origin);
     }
 
-    function syncFromTeacherWindow() {
-      if (!isStudentDisplayMode) return;
-      try {
-        const raw = localStorage.getItem('mq_live_student_sync');
-        if (!raw) return;
-        const payload = JSON.parse(raw);
-        if (payload.quizzes) state.quizzes = payload.quizzes;
-        if (payload.selectedQuizId) state.selectedQuizId = payload.selectedQuizId;
-        if (payload.game) Object.assign(state.game, payload.game);
-        render();
-      } catch (e) {}
+    function updateTimerDisplay() {
+      const g = state.game;
+      const timer = document.getElementById('game-timer-badge');
+      if (timer) timer.textContent = gameTimerText();
+      const countdown = document.getElementById('stage-countdown');
+      if (!countdown) return;
+      const seconds = g.phase === 'answering' ? g.timeLeft
+        : (g.phase === 'revealed' || g.phase === 'all_eliminated_alert') && g.autoAdvance ? g.revealTimeLeft : 0;
+      countdown.hidden = g.paused || seconds <= 0 || seconds > 10;
+      countdown.textContent = seconds;
+    }
+
+    function gameTimerText() {
+      const g = state.game;
+      const labels = {
+        ready:'문제 제시 대기', reading:`문제 읽기 ${g.readingTimeLeft}초`,
+        revival_intro:'패자부활전 안내 중', answering:`남은 시간 ${g.timeLeft}초`,
+        revealed:`정답·이동 ${g.revealTimeLeft}초`, all_eliminated_alert:`다음 문제 ${g.revealTimeLeft}초`,
+        finished:'퀴즈 종료'
+      };
+      return (labels[g.phase] || '') + (g.paused ? ' (일시정지)' : '');
+    }
+
+    function sendStudentCommand(action, value) {
+      window.opener?.postMessage({ type:'mq-command', action, value }, location.origin);
+    }
+
+    function runGameControl(action) {
+      if (isStudentDisplayMode) {
+        sendStudentCommand(action);
+        return;
+      }
+      const actions = { present:presentCurrentQuestion, pause:togglePauseGame, reveal:revealCurrentAnswer, next:goToNextQuestion };
+      actions[action]?.();
     }
 
     function updateGamePref(key, value, shouldRender = true) {
+      if (isStudentDisplayMode) {
+        sendStudentCommand('pref', { key, value });
+        return;
+      }
       state.game[key] = value;
       if (key === 'solveTimeSec' && (state.game.phase === 'ready' || state.game.phase === 'answering')) {
         state.game.timeLeft = Number(value);
@@ -522,7 +566,10 @@
       }
       saveUserGamePrefs();
       broadcastLiveSyncState();
-      if (shouldRender) render();
+      if (shouldRender) {
+        render();
+        if (state.route === 'play') initCameraAndGameLoop();
+      }
     }
 
     function getUserPrefsStorageKey() {
@@ -1556,9 +1603,9 @@
               교실 공간 이동형 실시간 퀴즈<br />
               <span class="text-blue-600">무브앤퀴즈 플랫폼</span>
             </h1>
-            <p class="text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed">
+            <p class="text-sm sm:text-base text-slate-600 home-intro leading-relaxed">
               학생들이 정답 구역으로 몸을 이동하면 머리 위 공중 뱃지가 실시간으로 표시됩니다.
-              상단의 <strong>퀴즈 만들기</strong>에서 새 퀴즈를 생성하거나, 아래에서 준비된 퀴즈를 선택해 바로 수업을 시작하세요.
+              상단의 <strong class="keep-word">퀴즈 만들기</strong>에서 새 퀴즈를 생성하거나, 아래에서 준비된 퀴즈를 선택해 바로 퀴즈를 시작하세요.
             </p>
             <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
               <div class="flex items-center gap-2">
@@ -1578,7 +1625,7 @@
                     + 새 퀴즈 출제
                   </button>
                   <button onclick="startGameSession('${selectedQuiz.id}')" class="h-12 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm whitespace-nowrap shadow-md flex items-center justify-center transition">
-                    ▶ 수업 시작하기
+                    ▶ 퀴즈 시작
                   </button>
                 </div>
               </div>
@@ -2202,12 +2249,21 @@
       `;
     }
 
+    function unlockGameAudio() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      try {
+        audioContext ||= new AudioCtx();
+        audioContext.resume().catch(() => {});
+      } catch (e) {}
+    }
+
     function playToneBeep(freq = 880, duration = 0.12, type = 'sine') {
       if (!state.game.soundEnabled) return;
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
-        const ctx = new AudioCtx();
+        const ctx = audioContext ||= new AudioCtx();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = type;
@@ -2253,20 +2309,23 @@
         initCameraAndGameLoop();
         state.game.revivalTimeout = setTimeout(() => {
           if (state.route === 'play' && state.game.phase === 'revival_intro') {
-            state.game.phase = 'answering';
-            render();
-            initCameraAndGameLoop();
+            beginQuestionReading();
           }
         }, 2800);
       } else {
-        state.game.phase = 'answering';
-        playToneBeep(660, 0.12, 'sine');
-        render();
-        initCameraAndGameLoop();
+        beginQuestionReading();
       }
     }
 
+    function beginQuestionReading() {
+      state.game.phase = 'reading';
+      state.game.readingTimeLeft = questionReadSeconds;
+      render();
+      initCameraAndGameLoop();
+    }
+
     function revealCurrentAnswer() {
+      if (state.game.phase !== 'answering') return;
       const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
       const questions = getActivePlayableQuestions(quiz);
       const q = questions[state.game.questionIndex] || questions[0];
@@ -2359,148 +2418,110 @@
     function renderPlayScreen() {
       const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
       const questions = getActivePlayableQuestions(quiz);
-      const q = questions[state.game.questionIndex] || questions[0];
-      const phase = state.game.phase;
-      const isRevealed = phase === 'revealed' || phase === 'finished';
-      const isRevival = q.stage === 'revival';
       const g = state.game;
+      const q = questions[g.questionIndex] || questions[0];
+      if (!q) return '<p class="p-6">진행할 문항이 없습니다.</p>';
+      const phase = g.phase;
+      const isRevealed = phase === 'revealed' || phase === 'finished';
+      const isSpecial = ['revival_intro', 'all_eliminated_alert', 'finished'].includes(phase);
+      const isTeacherMonitor = hasStudentWindow();
       const theme = THEME_CONFIGS[g.theme] || THEME_CONFIGS.classic;
       const aliveCount = g.participants.filter(p => !p.eliminated).length;
-      const isTeacherMonitor = !isStudentDisplayMode;
-
       const hudStyle = (g.hudX !== null && g.hudY !== null)
-        ? `left: ${g.hudX}px; top: ${g.hudY}px; opacity: ${g.hudOpacity};`
-        : `right: 16px; top: 16px; opacity: ${g.hudOpacity};`;
+        ? `left: min(${g.hudX}px, max(0px, calc(100% - 188px))); top: min(${g.hudY}px, calc(100% - 120px)); opacity: ${g.hudOpacity};`
+        : `right: 8px; top: 8px; opacity: ${g.hudOpacity};`;
 
       return `
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-4 space-y-3">
-          <!-- 상단 문제 출제 카드 -->
-          <div class="rounded-3xl p-4 sm:p-5 border-2 ${isRevival ? 'border-rose-400 ring-2 ring-rose-100' : theme.cardClass} shadow-sm space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="h-7 px-3 rounded-xl bg-slate-900 text-amber-300 text-[11px] font-black inline-flex items-center">
-                  ${theme.badge}
-                </span>
-                <span class="h-7 px-3 rounded-xl ${isRevival ? 'bg-rose-600' : 'bg-blue-600'} text-white text-xs font-black inline-flex items-center">
-                  ${isRevival ? '🔥 패자부활전 · ' : ''}문제 ${g.questionIndex + 1} / ${questions.length}
-                </span>
-                <span id="game-timer-badge" class="h-7 px-3 rounded-xl bg-slate-900 text-white text-xs font-black inline-flex items-center">
-                  ${phase === 'ready' ? `대기 중 (${g.solveTimeSec}초)` : phase === 'revival_intro' ? '패자부활전 안내 중' : isRevealed ? `정답·이동 ${g.revealTimeLeft}초` : `남은 시간 ${g.timeLeft}초`}
-                  ${g.paused ? ' (일시정지)' : ''}
-                </span>
-                <span class="h-7 px-3 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-black inline-flex items-center">
-                  생존 ${aliveCount}명 ${Number(g.targetSurvivors) > 0 ? `(목표 ${g.targetSurvivors}명)` : '(전체 완주)'}
-                </span>
-                ${isTeacherMonitor ? `
-                  <span class="h-7 px-3 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black inline-flex items-center">
-                    🔑 교사용 정답 미리보기: ${q.type === 'OX' ? q.options[q.answerIndex] : `${q.answerIndex + 1}번 (${q.options[q.answerIndex]})`}
-                  </span>
-                ` : `
-                  <span class="h-7 px-3 rounded-xl bg-indigo-100 text-indigo-900 text-xs font-black inline-flex items-center">
-                    📺 학생용 대형 화면 (정답 비공개)
-                  </span>
-                `}
-              </div>
-              ${isTeacherMonitor ? `
-                <div class="flex items-center gap-1.5">
-                  <button onclick="openStudentWindow()" class="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">학생용 새 창 띄우기</button>
-                  <button onclick="navigate('home')" class="h-8 px-3.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-extrabold">수업 종료</button>
-                </div>
-              ` : ''}
+        <div class="mx-auto px-2 sm:px-3 py-2 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl px-3 py-2 border ${theme.cardClass}">
+            <div class="flex flex-wrap items-center gap-2 text-xs font-black">
+              <span class="rounded-lg bg-blue-600 px-2 py-1 text-white">${q.stage === 'revival' ? '패자부활전 · ' : ''}문제 ${g.questionIndex + 1} / ${questions.length}</span>
+              <span id="game-timer-badge" class="rounded-lg bg-slate-900 px-2 py-1 text-white">${gameTimerText()}</span>
+              <span class="rounded-lg bg-emerald-100 px-2 py-1 text-emerald-900">생존 ${aliveCount}명</span>
             </div>
-
-            <h2 class="text-lg sm:text-2xl font-black ${g.theme === 'cyber' ? 'text-white' : 'text-slate-900'}">
-              ${phase === 'ready' ? (isTeacherMonitor ? '교사 조작 리모컨에서 [문제 제시] 버튼을 누르면 학생 화면에 문제가 공개됩니다.' : '잠시 후 선생님이 문제를 제시합니다. 준비해 주세요!') : escapeHtml(q.question)}
-            </h2>
-
-            ${phase !== 'ready' ? `
-              <div class="grid grid-cols-2 sm:grid-cols-${q.options.length} gap-2">
-                ${q.options.map((opt, idx) => {
-                  const isCorrect = (isRevealed || isTeacherMonitor) && q.answerIndex === idx;
-                  const teacherHintOnly = isTeacherMonitor && !isRevealed && q.answerIndex === idx;
-                  return `
-                    <div class="p-3 rounded-2xl border text-xs sm:text-sm font-extrabold flex items-center justify-between gap-2 ${
-                      isRevealed && q.answerIndex === idx
-                        ? 'bg-emerald-600 text-white border-emerald-500 shadow'
-                        : teacherHintOnly
-                          ? 'bg-amber-50 text-amber-950 border-amber-400 ring-2 ring-amber-200'
-                          : (g.theme === 'cyber' ? 'bg-indigo-900/80 text-cyan-100 border-cyan-500/40' : 'bg-white text-slate-800 border-slate-200')
-                    }">
-                      <span>${q.type === 'OX' ? '' : `${idx + 1}번. `}${escapeHtml(opt)}</span>
-                      ${teacherHintOnly ? '<span class="px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-black shrink-0">교사 정답</span>' : ''}
-                      ${isRevealed && q.answerIndex === idx ? '<span class="px-2 py-0.5 rounded bg-white text-emerald-700 text-[10px] font-black shrink-0">정답</span>' : ''}
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            ` : ''}
-
-            ${(isRevealed || isTeacherMonitor) && q.explanation ? `
-              <div class="p-3 rounded-2xl ${isRevealed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-950'} border text-xs font-bold">
-                💡 ${isRevealed ? '해설' : '교사용 해설 미리보기'}: ${escapeHtml(q.explanation)}
+            ${!isStudentDisplayMode ? `
+              <div class="flex flex-wrap gap-2 text-xs font-extrabold">
+                <button onclick="openStudentWindow()" class="rounded-lg bg-emerald-700 px-3 py-1.5 text-white">${isTeacherMonitor ? '학생용 창으로 이동' : '학생용 새창 열기'}</button>
+                <button onclick="navigate('home')" class="rounded-lg bg-slate-200 px-3 py-1.5 text-slate-900">퀴즈 종료</button>
               </div>
             ` : ''}
           </div>
 
-          <!-- 카메라 & 머리 위 공중 플로팅 뱃지 캔버스 영역 -->
-          <div id="play-stage-box" class="relative w-full ${isStudentDisplayMode ? 'h-[72vh]' : 'h-[58vh]'} min-h-[400px] rounded-3xl overflow-hidden border-2 border-slate-300 bg-slate-900 shadow-lg select-none">
+          ${isTeacherMonitor ? `
+            <section class="teacher-answer rounded-3xl border border-emerald-200 bg-slate-950 px-6 py-12 text-white">
+              <p class="text-base font-extrabold text-emerald-300">교사용 정답</p>
+              <strong class="mt-4 block text-emerald-200">${q.type === 'OX' ? '' : `${q.answerIndex + 1}번 · `}${escapeHtml(q.options[q.answerIndex])}</strong>
+              <h2 class="mt-6 text-xl font-black">${escapeHtml(q.question)}</h2>
+              ${q.explanation ? `<p class="mt-4 text-base text-slate-200">${escapeHtml(q.explanation)}</p>` : ''}
+            </section>
+          ` : `
+          <div id="play-stage-box" class="quiz-stage ${isStudentDisplayMode ? 'student-stage' : ''} relative w-full rounded-2xl overflow-hidden bg-slate-900 select-none">
             <video id="game-video" playsinline muted class="hidden"></video>
             <canvas id="game-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
 
-            <!-- 패자부활전 / 전원 탈락 규칙 / 최종 우승 투명 카메라 오버레이 대형 텍스트 -->
-            ${(phase === 'revival_intro' || phase === 'all_eliminated_alert' || phase === 'finished') ? `
-              <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center px-6 text-center z-20 ${phase === 'revival_intro' ? 'animate-revival-overlay' : ''}">
-                <div class="text-4xl sm:text-7xl font-black tracking-tight text-amber-300 drop-shadow-[0_6px_18px_rgba(0,0,0,0.95)]" style="-webkit-text-stroke: 2px #0f172a;">
-                  ${escapeHtml(g.specialBannerText)}
-                </div>
-                <div class="mt-3 text-base sm:text-2xl font-black text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.95)] max-w-3xl">
-                  ${escapeHtml(g.specialBannerSub)}
+            ${!isSpecial && !isRevealed ? `
+              <div class="absolute inset-x-0 top-[6%] bottom-[15%] z-10 flex items-center justify-center text-center pointer-events-none">
+                <div id="stage-question" class="stage-question font-black ${phase === 'answering' ? 'is-moving' : ''}">
+                  ${phase === 'ready' ? '문제 제시를 기다려 주세요.' : escapeHtml(q.question)}
+                  ${phase !== 'ready' && q.type !== 'OX' ? `
+                    <ol class="mt-3 grid grid-cols-2 gap-2 text-left text-[.48em]">${q.options.map((option, index) => `<li>${index + 1}. ${escapeHtml(option)}</li>`).join('')}</ol>
+                  ` : ''}
                 </div>
               </div>
+              ${phase === 'answering' ? '<div class="absolute inset-x-0 bottom-4 z-20 text-center pointer-events-none move-cue"><span class="rounded-xl bg-slate-950/90 px-5 py-2 text-xl font-black text-white">이동 시작!</span></div>' : ''}
+            ` : ''}
+            <div id="stage-countdown" class="stage-countdown" aria-hidden="true" hidden></div>
+
+            ${isSpecial ? `
+              <div class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center px-6 text-center z-20">
+                <div class="text-4xl sm:text-7xl font-black text-amber-300 drop-shadow-lg">${escapeHtml(g.specialBannerText)}</div>
+                <div class="mt-3 text-base sm:text-2xl font-black text-white drop-shadow-lg">${escapeHtml(g.specialBannerSub)}</div>
+              </div>
+            ` : ''}
+            ${isRevealed && q.explanation ? `
+              <div class="absolute inset-x-2 bottom-2 z-20 text-center pointer-events-none"><span class="inline-block rounded-lg bg-slate-950/90 px-3 py-2 text-sm font-bold text-white">${escapeHtml(q.explanation)}</span></div>
             ` : ''}
 
-            <!-- 교사 화면에서만 표시되는 드래그 및 투명도 조절 교사 조작 리모컨(HUD) -->
-            ${isTeacherMonitor ? `
             <div
               id="teacher-control-hud"
               style="${hudStyle}"
-              class="absolute z-30 w-[290px] sm:w-[320px] rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/20 text-white shadow-2xl p-3 space-y-2.5"
+              class="absolute z-30 w-[184px] max-w-[95%] rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/20 text-white shadow-2xl p-1.5 space-y-1"
             >
-              <div id="teacher-hud-drag-handle" class="cursor-move flex items-center justify-between gap-2 pb-2 border-b border-white/15">
+              <div id="teacher-hud-drag-handle" class="cursor-move flex items-center justify-between gap-1 pb-1 border-b border-white/15">
                 <span class="text-[11px] font-black text-amber-300 flex items-center gap-1">
-                  ⠿ 교사 조작 리모컨 (드래그 이동)
+                  ⠿ 조작 리모컨
                 </span>
                 <div class="flex items-center gap-1.5" onpointerdown="event.stopPropagation()">
-                  <span class="text-[10px] text-slate-300 font-bold">투명도</span>
+                  
                   <input
-                    type="range"
+                    type="range" aria-label="리모컨 투명도" title="리모컨 투명도"
                     min="0.25"
                     max="1"
                     step="0.05"
                     value="${g.hudOpacity}"
-                    oninput="const v=Number(this.value); state.game.hudOpacity=v; document.getElementById('teacher-control-hud').style.opacity=v; saveUserGamePrefs();"
-                    class="w-16 accent-amber-400 cursor-pointer"
+                    oninput="const v=Number(this.value); state.game.hudOpacity=v; document.getElementById('teacher-control-hud').style.opacity=v; if(isStudentDisplayMode) state.game.adjustedLocalHud=true; else saveUserGamePrefs();"
+                    class="w-10 accent-amber-400 cursor-pointer"
                   />
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-1.5">
-                <button onclick="presentCurrentQuestion()" class="h-9 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('present')" class="h-7 px-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
                   ▶ 문제 제시
                 </button>
-                <button onclick="togglePauseGame()" class="h-9 px-2.5 rounded-xl ${g.paused ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 hover:bg-slate-700 text-white'} text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
-                  ${g.paused ? '▶ 카운트 재개' : '⏸ 일시정지'}
+                <button onclick="runGameControl('pause')" class="h-7 px-1 rounded-lg ${g.paused ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 hover:bg-slate-700 text-white'} text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
+                  ${g.paused ? '▶ 재개' : '⏸ 일시정지'}
                 </button>
-                <button onclick="revealCurrentAnswer()" class="h-9 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('reveal')" class="h-7 px-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
                   ✓ 정답 공개
                 </button>
-                <button onclick="goToNextQuestion()" class="h-9 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('next')" class="h-7 px-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
                   다음 문제 →
                 </button>
               </div>
 
-              <button onclick="state.game.showLiveSettings=!state.game.showLiveSettings; render(); initCameraAndGameLoop();" class="w-full h-8 rounded-xl bg-white/10 hover:bg-white/15 text-[11px] font-extrabold text-slate-200 flex items-center justify-center">
-                ⚙ 실시간 진행 조건 조정 ${g.showLiveSettings ? '▲' : '▼'}
+              <button onclick="state.game.showLiveSettings=!state.game.showLiveSettings; render(); initCameraAndGameLoop();" class="w-full h-6 rounded-lg bg-white/10 hover:bg-white/15 text-[11px] font-extrabold text-slate-200 flex items-center justify-center">
+                ⚙ 진행 설정 ${g.showLiveSettings ? '▲' : '▼'}
               </button>
 
               ${g.showLiveSettings ? `
@@ -2528,24 +2549,15 @@
                   </div>
                   <div class="flex items-center justify-between gap-2 pt-1 border-t border-white/10">
                     <span class="text-slate-300 font-bold">문제 넘김</span>
-                    <button onclick="updateGamePref('autoAdvance', !state.game.autoAdvance, true); initCameraAndGameLoop();" class="px-2.5 py-1 rounded-lg font-extrabold ${g.autoAdvance ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-200'}">
+                    <button onclick="updateGamePref('autoAdvance', !state.game.autoAdvance, true);" class="px-2.5 py-1 rounded-lg font-extrabold ${g.autoAdvance ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-200'}">
                       ${g.autoAdvance ? '자동 넘김' : '수동 넘김'}
                     </button>
                   </div>
                 </div>
               ` : ''}
             </div>
-            ` : ''}
-
-            <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-              <span class="px-3 py-1.5 rounded-xl bg-slate-950/75 text-white text-[11px] font-bold">
-                머리 위 공중 뱃지 표시 · 얇은 경계선(경고색/미선택) · 외곽 이탈(뱃지 깜빡임)
-              </span>
-              <span class="px-3 py-1.5 rounded-xl bg-slate-950/75 text-slate-200 text-[11px] font-bold">
-                학생 위치를 드래그해 경계선·이탈 경고를 테스트할 수 있습니다
-              </span>
-            </div>
           </div>
+          `}
         </div>
       `;
     }
@@ -2566,6 +2578,10 @@
         cancelAnimationFrame(state.game.animFrameId);
         state.game.animFrameId = null;
       }
+      stopGameCamera();
+    }
+
+    function stopGameCamera() {
       if (state.game.videoStream) {
         state.game.videoStream.getTracks().forEach(t => t.stop());
         state.game.videoStream = null;
@@ -2575,6 +2591,8 @@
 
     function startGameSession(quizId) {
       if (quizId) state.selectedQuizId = quizId;
+      unlockGameAudio();
+      state.game.phase = 'ready';
       state.game.questionIndex = 0;
       state.game.paused = false;
       state.game.participants.forEach(p => { p.eliminated = false; });
@@ -2582,20 +2600,40 @@
       state.game.revealTimeLeft = state.game.revealMoveTimeSec;
       navigate('play');
       setTimeout(() => {
-        presentCurrentQuestion();
+        if (state.route === 'play' && state.game.phase === 'ready') presentCurrentQuestion();
       }, 60);
     }
 
     function openStudentWindow() {
-      broadcastLiveSyncState();
+      if (hasStudentWindow()) {
+        studentWindow.focus();
+        return;
+      }
+      unlockGameAudio();
       const url = new URL(window.location.href);
       url.searchParams.set('view', 'student');
+      url.searchParams.set('ui', 'classroom');
       const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
-      if (popup) {
-        showToast('학생용 전용 창이 열렸습니다! 학생 화면에는 정답과 해설이 숨겨집니다.', 'success');
-      } else {
-        showToast('팝업 차단이 설정되어 있습니다. 브라우저 주소창 우측에서 팝업을 허용해 주세요.', 'warning');
+      if (!popup) {
+        showToast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.', 'warning');
+        return;
       }
+      studentWindow = popup;
+      if (state.route === 'play') {
+        stopGameCamera();
+        render();
+        initCameraAndGameLoop();
+      }
+      clearInterval(studentWindowWatch);
+      studentWindowWatch = setInterval(() => {
+        if (hasStudentWindow()) return;
+        clearInterval(studentWindowWatch);
+        studentWindow = null;
+        if (state.route === 'play') {
+          render();
+          initCameraAndGameLoop();
+        }
+      }, 500);
     }
 
     function detectFacesOnVideoFrame(video) {
@@ -2811,6 +2849,32 @@
 
       const boundWarnCheck = (zx) => activeList.some(p => p.status === 'boundary' && Math.abs(p.x * w - zx) < boundPx * 2.5);
       const anyBoundaryCheck = () => activeList.some(p => p.status === 'boundary');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const drawZone = (index, x, y, width, height) => {
+        ctx.fillStyle = zoneColors[index % zoneColors.length];
+        ctx.fillRect(x, y, width, height);
+        const correct = isRevealed && index === correctAnswerIndex;
+        if (correct) {
+          const intensity = reducedMotion ? .46 : .34 + .2 * (1 + Math.sin(performance.now() / 230)) / 2;
+          ctx.fillStyle = `rgba(16, 185, 129, ${intensity})`;
+          ctx.fillRect(x, y, width, height);
+          ctx.strokeStyle = '#6ee7b7';
+          ctx.lineWidth = 6;
+          ctx.strokeRect(x + 3, y + 3, Math.max(0, width - 6), Math.max(0, height - 6));
+        }
+        const label = optCount === 2 ? (index === 0 ? 'O' : 'X') : String(index + 1);
+        const size = Math.max(28, Math.min(180, width * .5, height * .56));
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `900 ${size}px "Noto Sans KR", sans-serif`;
+        ctx.fillStyle = correct ? 'rgba(236,253,245,.88)' : 'rgba(255,255,255,.29)';
+        ctx.fillText(label, x + width / 2, y + height * .55);
+        if (correct) {
+          ctx.font = '900 22px "Noto Sans KR", sans-serif';
+          ctx.fillStyle = '#ecfdf5';
+          ctx.fillText('✓ 정답', x + width / 2, y + 25);
+        }
+      };
 
       if (is2x2) {
         const halfW = activeW / 2;
@@ -2820,13 +2884,7 @@
             const idx = r * 2 + c;
             const zx = marginX + c * halfW;
             const zy = marginY + r * halfH;
-            ctx.fillStyle = zoneColors[idx % zoneColors.length];
-            ctx.fillRect(zx, zy, halfW, halfH);
-
-            ctx.fillStyle = 'rgba(255,255,255,0.9)';
-            ctx.font = '900 17px "Noto Sans KR", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(`${idx + 1}번 구역`, zx + halfW / 2, zy + 28);
+            drawZone(idx, zx, zy, halfW, halfH);
           }
         }
         const hasBound = anyBoundaryCheck();
@@ -2837,13 +2895,7 @@
         const zoneW = activeW / optCount;
         for (let i = 0; i < optCount; i++) {
           const zx = marginX + i * zoneW;
-          ctx.fillStyle = zoneColors[i % zoneColors.length];
-          ctx.fillRect(zx, marginY, zoneW, activeH);
-
-          ctx.fillStyle = 'rgba(255,255,255,0.9)';
-          ctx.font = '900 17px "Noto Sans KR", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(optCount === 2 ? (i === 0 ? 'O 구역' : 'X 구역') : `${i + 1}번 구역`, zx + zoneW / 2, marginY + 28);
+          drawZone(i, zx, marginY, zoneW, activeH);
 
           if (i > 0) {
             const hasBoundaryPerson = boundWarnCheck(zx);
@@ -2939,7 +2991,14 @@
         draggingParticipant.x = pos.x;
         draggingParticipant.y = pos.y;
       };
-      canvas.onpointerup = () => { draggingParticipant = null; };
+      canvas.onpointerup = () => {
+        if (draggingParticipant && isStudentDisplayMode) {
+          const { id, x, y } = draggingParticipant;
+          sendStudentCommand('position', { id, x, y });
+        }
+        draggingParticipant = null;
+      };
+      canvas.onpointercancel = () => { draggingParticipant = null; };
     }
 
     async function toggleSettingsPreviewCamera() {
@@ -3013,49 +3072,72 @@
       state.game.animFrameId = requestAnimationFrame(previewLoop);
     }
 
-    async function initCameraAndGameLoop() {
+    function startGameTimer() {
+      if (state.game.timerInterval) clearInterval(state.game.timerInterval);
+      const g = state.game;
+      g.timerInterval = setInterval(() => {
+        if (state.route !== 'play' || g.paused) return;
+        if (g.phase === 'reading') {
+          if (--g.readingTimeLeft <= 0) {
+            g.phase = 'answering';
+            playToneBeep(660, 0.19, 'triangle');
+            render();
+            initCameraAndGameLoop();
+            return;
+          }
+        } else if (g.phase === 'answering') {
+          if (--g.timeLeft <= 0) {
+            revealCurrentAnswer();
+            return;
+          }
+          if (g.timeLeft <= g.countdownSoundStartSec) {
+            playToneBeep(g.timeLeft <= 3 ? 1046.5 : 784, 0.1, 'sine');
+          }
+        } else if ((g.phase === 'revealed' || g.phase === 'all_eliminated_alert') && g.autoAdvance) {
+          if (--g.revealTimeLeft <= 0) {
+            goToNextQuestion();
+            return;
+          }
+        } else {
+          return;
+        }
+        updateTimerDisplay();
+        broadcastLiveSyncState(true);
+      }, 1000);
+    }
+
+    async function connectGameCamera(video) {
+      if (!video || !navigator.mediaDevices?.getUserMedia) return;
+      const g = state.game;
+      if (!g.videoStream && !cameraRequest) {
+        cameraRequest = navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user' }, audio:false })
+          .then(stream => {
+            if (state.route !== 'play' || !document.getElementById('game-video') || hasStudentWindow()) {
+              stream.getTracks().forEach(track => track.stop());
+              return;
+            }
+            g.videoStream = stream;
+            g.cameraActive = true;
+          }).catch(() => { g.cameraActive = false; }).finally(() => { cameraRequest = null; });
+      }
+      if (cameraRequest) await cameraRequest;
+      if (g.videoStream && video.isConnected && !hasStudentWindow()) {
+        video.srcObject = g.videoStream;
+        await video.play().catch(() => {});
+      }
+    }
+
+    function initCameraAndGameLoop() {
+      const g = state.game;
+      if (g.animFrameId) cancelAnimationFrame(g.animFrameId);
+      if (state.route !== 'play') return;
+      if (!isStudentDisplayMode) startGameTimer();
+      updateTimerDisplay();
+
       const canvas = document.getElementById('game-canvas');
       const video = document.getElementById('game-video');
       if (!canvas) return;
-
-      if (!state.game.cameraActive && navigator.mediaDevices?.getUserMedia) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-          state.game.videoStream = stream;
-          state.game.cameraActive = true;
-          if (video) {
-            video.srcObject = stream;
-            await video.play();
-          }
-        } catch (err) {
-          state.game.cameraActive = false;
-        }
-      }
-
-      if (state.game.timerInterval) clearInterval(state.game.timerInterval);
-      state.game.timerInterval = setInterval(() => {
-        if (state.route !== 'play' || state.game.paused) return;
-        const badge = document.getElementById('game-timer-badge');
-
-        if (state.game.phase === 'answering') {
-          if (state.game.timeLeft > 0) {
-            state.game.timeLeft -= 1;
-            if (state.game.timeLeft > 0 && state.game.timeLeft <= state.game.countdownSoundStartSec) {
-              playToneBeep(state.game.timeLeft <= 3 ? 1046.5 : 784, 0.1, 'sine');
-            }
-            if (badge) badge.textContent = `남은 시간 ${state.game.timeLeft}초`;
-          } else {
-            revealCurrentAnswer();
-          }
-        } else if ((state.game.phase === 'revealed' || state.game.phase === 'all_eliminated_alert') && state.game.autoAdvance) {
-          if (state.game.revealTimeLeft > 0) {
-            state.game.revealTimeLeft -= 1;
-            if (badge) badge.textContent = `정답·이동 ${state.game.revealTimeLeft}초`;
-          } else {
-            goToNextQuestion();
-          }
-        }
-      }, 1000);
+      connectGameCamera(video);
 
       // 교사 조작 리모컨(HUD) 드래그 이동 처리
       const hudEl = document.getElementById('teacher-control-hud');
@@ -3095,11 +3177,12 @@
       attachParticipantDragHandlers(canvas);
 
       const drawLoop = () => {
-        if (state.route !== 'play') return;
+        if (state.route !== 'play' || !canvas.isConnected) return;
         const quiz = state.quizzes.find(q => q.id === state.selectedQuizId) || state.quizzes[0];
         const questions = getActivePlayableQuestions(quiz);
         const q = questions[state.game.questionIndex] || questions[0];
-        const isRev = state.game.phase === 'revealed' || state.game.phase === 'finished';
+        if (!q) return;
+        const isRev = ['revealed', 'all_eliminated_alert', 'finished'].includes(state.game.phase);
         renderStageCanvasFrame(canvas, video, q.options.length, q.answerIndex, isRev);
         state.game.animFrameId = requestAnimationFrame(drawLoop);
       };
@@ -3117,6 +3200,7 @@
         btn.className = active
           ? 'nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition bg-blue-600 text-white shadow-sm'
           : 'nav-btn px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition bg-slate-100 hover:bg-slate-200 text-slate-700';
+        if (btn.dataset.nav === 'settings') btn.classList.add('settings-nav');
       });
 
       const main = document.getElementById('app-main');
@@ -3127,24 +3211,70 @@
       else if (state.route === 'creator') main.innerHTML = renderCreatorScreen();
       else if (state.route === 'settings') main.innerHTML = renderSettingsScreen();
       else if (state.route === 'play') main.innerHTML = renderPlayScreen();
+      else main.innerHTML = '<p class="p-8 text-center font-bold">퀴즈 시작을 기다려 주세요.</p>';
 
       renderModal();
     }
 
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'mq_live_student_sync' && isStudentDisplayMode) {
-        syncFromTeacherWindow();
+    window.addEventListener('message', event => {
+      if (event.origin !== location.origin || !event.data) return;
+      const msg = event.data;
+      if (isStudentDisplayMode) {
+        if (event.source !== window.opener) return;
+        if (msg.type === 'mq-timer') {
+          const { timeLeft, revealTimeLeft, readingTimeLeft } = msg;
+          Object.assign(state.game, { timeLeft, revealTimeLeft, readingTimeLeft });
+          updateTimerDisplay();
+        } else if (msg.type === 'mq-state') {
+          if (msg.route !== 'play') stopCameraAndTimers();
+          state.route = msg.route === 'play' ? 'play' : 'waiting';
+          state.quizzes = msg.quizzes;
+          state.selectedQuizId = msg.selectedQuizId;
+          const localHudOpacity = state.game.hudOpacity;
+          Object.assign(state.game, msg.game);
+          if (state.game.adjustedLocalHud) state.game.hudOpacity = localHudOpacity;
+          render();
+          initCameraAndGameLoop();
+        }
+        return;
+      }
+
+      if (!hasStudentWindow() || event.source !== studentWindow) return;
+      if (msg.type === 'mq-ready') {
+        broadcastLiveSyncState();
+      } else if (msg.type === 'mq-command' && state.route === 'play') {
+        const { action, value } = msg;
+        if (action === 'pref') {
+          const bounds = { solveTimeSec:[5, 90], countdownSoundStartSec:[0, 20], revealMoveTimeSec:[2, 60] };
+          if (value?.key === 'autoAdvance' && typeof value.value === 'boolean') {
+            updateGamePref('autoAdvance', value.value);
+          } else if (typeof value?.value === 'number' && Number.isFinite(value.value) && Object.hasOwn(bounds, value.key)) {
+            const [min, max] = bounds[value.key];
+            updateGamePref(value.key, Math.min(max, Math.max(min, value.value)), false);
+            updateTimerDisplay();
+          }
+        } else if (action === 'position') {
+          const p = state.game.participants.find(person => person.id === value?.id);
+          if (p && Number.isFinite(value.x) && Number.isFinite(value.y)) {
+            p.x = Math.min(1, Math.max(0, value.x));
+            p.y = Math.min(1, Math.max(0, value.y));
+            const quiz = state.quizzes.find(q => q.id === state.selectedQuizId);
+            const question = quiz && getActivePlayableQuestions(quiz)[state.game.questionIndex];
+            if (question) evaluateParticipantZone(p, question.options.length);
+          }
+        } else if (['present', 'pause', 'reveal', 'next'].includes(action)) {
+          runGameControl(action);
+        }
       }
     });
 
     window.addEventListener('DOMContentLoaded', () => {
       loadPersistedData();
       if (isStudentDisplayMode) {
-        syncFromTeacherWindow();
-        setTimeout(() => initCameraAndGameLoop(), 80);
-      } else {
-        render();
+        state.route = 'waiting';
+        window.opener?.postMessage({ type:'mq-ready' }, location.origin);
       }
+      render();
     });
   </script>
 </body>
