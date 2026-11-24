@@ -12,7 +12,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gowun+Dodum&family=Inter:wght@400;600;700;800;900&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <style>
 
+    /* Scale rem-based typography, controls and spacing together on larger displays. */
+    :root:not(:has(#app-main > .play-layout)) {
+      font-size:clamp(100%, calc(100% + .5vw - 6.4px), 162.5%);
+    }
     .settings-nav { position:relative; display:inline-grid; place-items:center; }
+    .settings-nav svg { inline-size:1.25rem; block-size:1.25rem; }
     .settings-nav::after { content:'설정'; position:absolute; z-index:45; top:100%; left:50%; transform:translateX(-50%); padding:.3rem .55rem; border-radius:.45rem; background:#0f172a; color:white; opacity:0; pointer-events:none; }
     .settings-nav:hover::after, .settings-nav:focus-visible::after { opacity:1; }
     .keep-word { white-space:nowrap; }
@@ -65,7 +70,7 @@
     .camera-preview-toolbar { flex-wrap:wrap; gap:.25rem; }
     .camera-preview-label { flex:0 0 auto; }
     .settings-panel .setting-row { flex-wrap:wrap; gap:.5rem; }
-    .camera-preview-hud { max-width:calc(100% - 16px); }
+    .camera-preview-hud { width:14.6875rem; max-width:calc(100% - 16px); }
     #app-main:has(> .play-layout) { display:flex; flex-direction:column; }
     .play-layout { display:flex; flex:1; flex-direction:column; }
     .play-layout .quiz-stage { flex:1; height:auto; min-height:clamp(18rem,58dvh,32rem); }
@@ -251,14 +256,14 @@
           </div>
           <div>
             <div class="font-black text-base sm:text-lg leading-none tracking-tight text-slate-900">Move &amp; Quiz</div>
-            <div class="text-[11px] font-bold text-slate-500 mt-0.5">무브앤퀴즈</div>
+            <div class="text-[.6875rem] font-bold text-slate-500 mt-0.5">무브앤퀴즈</div>
           </div>
         </button>
 
-        <!-- 기리공작소 v1.2.2 고정 저작권 마크 -->
+        <!-- 기리공작소 v1.2.3 고정 저작권 마크 -->
         <div
           id="author-badge"
-          title="제작: 기리공작소 (Move & Quiz v1.2.2)"
+          title="제작: 기리공작소 (Move & Quiz v1.2.3)"
           class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 select-none"
         >
           <div id="author-avatar-box" class="w-6 h-6 rounded-full bg-white border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
@@ -270,7 +275,7 @@
             />
           </div>
           <span class="text-xs font-extrabold text-slate-700 whitespace-nowrap">기리공작소</span>
-          <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap">v1.2.2</span>
+          <span class="text-[.6875rem] font-bold text-slate-500 whitespace-nowrap">v1.2.3</span>
         </div>
       </div>
 
@@ -869,14 +874,14 @@
       const stats = getQuotaStats();
       const barColor = stats.pctRemaining > 50 ? 'bg-emerald-500' : stats.pctRemaining > 20 ? 'bg-amber-500' : 'bg-rose-500';
       const tierBadge = state.quota.tier === 'paid'
-        ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-black">PRO</span>'
-        : '<span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-black">FREE</span>';
+        ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[.625rem] font-black">PRO</span>'
+        : '<span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[.625rem] font-black">FREE</span>';
 
       bar.innerHTML = `
         <!-- Gemini 사용량 게이지 (클릭 시 상세 보기) -->
         <button onclick="openModal('quota')" title="클릭하여 Gemini AI 사용량 상세 내역 확인" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-left">
           <div>
-            <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-slate-700">
+            <div class="flex items-center gap-1.5 text-[.6875rem] font-extrabold text-slate-700">
               <span>Gemini 잔여</span>
               ${tierBadge}
               <span class="text-slate-900">${stats.remaining}/${stats.limit}회</span>
@@ -1028,7 +1033,7 @@
                     onkeydown="if(event.key==='Enter') completeGoogleLoginAuto()"
                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-bold placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p class="text-[11px] text-slate-500 leading-relaxed">
+                  <p class="text-[.6875rem] text-slate-500 leading-relaxed">
                     입력한 Google 계정을 바탕으로 무료·유료 Gemini 사용 한도가 자동 설정되며, Google Drive 폴더에 퀴즈를 저장할 수 있습니다.
                   </p>
                   <button onclick="completeGoogleLoginAuto()" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition">
@@ -1068,7 +1073,7 @@
                 <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
                   <div class="h-full ${barColor} transition-all" style="width: ${stats.pctRemaining}%"></div>
                 </div>
-                <div class="text-[11px] text-slate-500">오늘 사용한 횟수: ${stats.used}회 (매일 자정 자동 초기화)</div>
+                <div class="text-[.6875rem] text-slate-500">오늘 사용한 횟수: ${stats.used}회 (매일 자정 자동 초기화)</div>
               </div>
 
               <div class="space-y-1.5">
@@ -1140,7 +1145,7 @@
                         <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                           <div>
                             <div class="text-xs font-extrabold text-slate-900">${escapeHtml(q.title)}</div>
-                            <div class="text-[11px] text-slate-500">${q.questions.length}문항 · ${escapeHtml(q.updatedAt || '')}</div>
+                            <div class="text-[.6875rem] text-slate-500">${q.questions.length}문항 · ${escapeHtml(q.updatedAt || '')}</div>
                           </div>
                           <button onclick="importSingleDriveQuiz('${q.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">불러오기</button>
                         </div>
@@ -1689,7 +1694,7 @@
             <div class="p-3 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
               <div class="flex items-center gap-2">
                 <span class="text-xs font-extrabold text-slate-600">현재 선택된 수업 퀴즈</span>
-                ${selectedQuiz.isSample ? '<span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-black">기본 체험 샘플</span>' : '<span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-black">내 퀴즈</span>'}
+                ${selectedQuiz.isSample ? '<span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[.625rem] font-black">기본 체험 샘플</span>' : '<span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[.625rem] font-black">내 퀴즈</span>'}
               </div>
               <div class="home-quiz-picker">
                 <select onchange="state.selectedQuizId=this.value; render();" class="flex-1 h-12 px-4 rounded-2xl border border-slate-300 bg-white text-sm sm:text-base font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -1755,10 +1760,10 @@
                   <div class="space-y-2">
                     <div class="library-meta flex items-center justify-between gap-2">
                       <div class="flex items-center gap-1.5">
-                        <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-extrabold">${escapeHtml(q.grade || '전학년')}</span>
-                        ${revivalCount > 0 ? `<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[10px] font-black">패자부활전 ${revivalCount}문항</span>` : ''}
+                        <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[.6875rem] font-extrabold">${escapeHtml(q.grade || '전학년')}</span>
+                        ${revivalCount > 0 ? `<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[.625rem] font-black">패자부활전 ${revivalCount}문항</span>` : ''}
                       </div>
-                      <span class="text-[11px] font-bold ${q.syncedDrive ? 'text-emerald-600' : 'text-slate-400'}">
+                      <span class="text-[.6875rem] font-bold ${q.syncedDrive ? 'text-emerald-600' : 'text-slate-400'}">
                         ${q.syncedDrive ? `☁ ${escapeHtml(q.driveFolder || 'Drive 저장됨')}` : (q.isSample ? '기본 제공 샘플' : '브라우저 보관')}
                       </span>
                     </div>
@@ -1782,11 +1787,11 @@
     function renderInsertQuestionBar(insertIndex) {
       return `
         <div class="flex flex-wrap items-center justify-center gap-2 py-1.5 px-3 rounded-xl border border-dashed border-slate-300 bg-white/80 hover:border-blue-400 transition">
-          <span class="text-[11px] font-bold text-slate-400 mr-1">${insertIndex === 0 ? '맨 앞에 추가:' : `${insertIndex}번 다음 위치에 바로 추가:`}</span>
-          <button onclick="insertDraftQuestionAt(${insertIndex}, 'OX', 'main')" class="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 text-[11px] font-extrabold transition">+ 본 문제(OX)</button>
-          <button onclick="insertDraftQuestionAt(${insertIndex}, '4CHOICE', 'main')" class="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-[11px] font-extrabold transition">+ 본 문제(4지선다)</button>
-          <button onclick="insertDraftQuestionAt(${insertIndex}, 'OX', 'revival')" class="h-7 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold transition">+ 🔥 패자부활전(OX)</button>
-          <button onclick="insertDraftQuestionAt(${insertIndex}, '4CHOICE', 'revival')" class="h-7 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold transition">+ 🔥 패자부활전(4지선다)</button>
+          <span class="text-[.6875rem] font-bold text-slate-400 mr-1">${insertIndex === 0 ? '맨 앞에 추가:' : `${insertIndex}번 다음 위치에 바로 추가:`}</span>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, 'OX', 'main')" class="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 text-[.6875rem] font-extrabold transition">+ 본 문제(OX)</button>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, '4CHOICE', 'main')" class="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-[.6875rem] font-extrabold transition">+ 본 문제(4지선다)</button>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, 'OX', 'revival')" class="h-7 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[.6875rem] font-extrabold transition">+ 🔥 패자부활전(OX)</button>
+          <button onclick="insertDraftQuestionAt(${insertIndex}, '4CHOICE', 'revival')" class="h-7 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[.6875rem] font-extrabold transition">+ 🔥 패자부활전(4지선다)</button>
         </div>
       `;
     }
@@ -1841,7 +1846,7 @@
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-3">
                   <div class="space-y-1">
                     <div class="text-xs font-black text-slate-900">엑셀 표준 양식 받기</div>
-                    <p class="text-[11px] text-slate-600">표준 엑셀 양식(.xlsx)에 문제유형(OX / 4지선다), 질문, 보기, 정답번호를 입력해 준비하세요.</p>
+                    <p class="text-[.6875rem] text-slate-600">표준 엑셀 양식(.xlsx)에 문제유형(OX / 4지선다), 질문, 보기, 정답번호를 입력해 준비하세요.</p>
                   </div>
                   <button onclick="downloadExcelTemplate()" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold self-start flex items-center justify-center whitespace-nowrap">
                     ⬇ 엑셀 표준 양식 받기 (.xlsx)
@@ -1850,7 +1855,7 @@
                 <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col justify-between gap-3">
                   <div class="space-y-1">
                     <div class="text-xs font-black text-emerald-950">작성한 엑셀 파일 불러오기</div>
-                    <p class="text-[11px] text-emerald-800">업로드하면 하단 웹 편집기에서 바로 수정하고 퀴즈로 사용할 수 있습니다.</p>
+                    <p class="text-[.6875rem] text-emerald-800">업로드하면 하단 웹 편집기에서 바로 수정하고 퀴즈로 사용할 수 있습니다.</p>
                   </div>
                   <label class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm self-start inline-flex items-center justify-center cursor-pointer whitespace-nowrap">
                     ⬆ 엑셀 파일 불러오기
@@ -1866,7 +1871,7 @@
               <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <span class="text-xs font-black text-blue-950">공통 출제 설정 (필수 · 중복 선택 가능)</span>
-                  <span class="text-[11px] font-bold text-blue-700">미선택 시 안내 알림이 표시됩니다</span>
+                  <span class="text-[.6875rem] font-bold text-blue-700">미선택 시 안내 알림이 표시됩니다</span>
                 </div>
                 <div class="fluid-columns gap-4">
                   <div class="space-y-1.5">
@@ -1902,7 +1907,7 @@
                           oninput="const onlyNum = this.value.replace(/[^0-9]/g, ''); this.value = onlyNum; state.creator.questionCount = onlyNum ? Math.min(50, Math.max(1, Number(onlyNum))) : '';"
                           class="w-36 px-3 py-2 rounded-xl border border-blue-400 bg-white text-xs font-black text-slate-900 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <span class="text-[11px] font-bold text-slate-600">문항 (숫자만 입력해 주세요 · 최대 50문항)</span>
+                        <span class="text-[.6875rem] font-bold text-slate-600">문항 (숫자만 입력해 주세요 · 최대 50문항)</span>
                       </div>
                     ` : ''}
                   </div>
@@ -1915,11 +1920,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <button onclick="state.creator.aiSubMode='material'; render();" class="p-3.5 rounded-2xl border-2 text-left transition ${c.aiSubMode === 'material' ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
                     <div class="text-sm font-black">📄 첨부 자료 기반 출제</div>
-                    <div class="text-[11px] mt-0.5 ${c.aiSubMode === 'material' ? 'text-purple-100' : 'text-slate-500'}">PDF, 이미지, 한글, 워드, PPT 자료 안에서 문제 생성</div>
+                    <div class="text-[.6875rem] mt-0.5 ${c.aiSubMode === 'material' ? 'text-purple-100' : 'text-slate-500'}">PDF, 이미지, 한글, 워드, PPT 자료 안에서 문제 생성</div>
                   </button>
                   <button onclick="state.creator.aiSubMode='selected'; render();" class="p-3.5 rounded-2xl border-2 text-left transition ${c.aiSubMode === 'selected' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
                     <div class="text-sm font-black">🎯 학년·주제 맞춤 출제</div>
-                    <div class="text-[11px] mt-0.5 ${c.aiSubMode === 'selected' ? 'text-indigo-100' : 'text-slate-500'}">대상 학년과 카테고리를 중복 선택하여 즉시 출제</div>
+                    <div class="text-[.6875rem] mt-0.5 ${c.aiSubMode === 'selected' ? 'text-indigo-100' : 'text-slate-500'}">대상 학년과 카테고리를 중복 선택하여 즉시 출제</div>
                   </button>
                 </div>
               </div>
@@ -1963,7 +1968,7 @@
                       </button>
                     </div>
                     <div class="space-y-2">
-                      <div class="text-[11px] font-bold text-slate-500">분야</div>
+                      <div class="text-[.6875rem] font-bold text-slate-500">분야</div>
                       <div class="flex flex-wrap gap-2">
                         ${CATEGORY_GROUPS.general.map(cat => {
                           const active = c.selectedCategories.includes(cat);
@@ -1972,7 +1977,7 @@
                       </div>
                     </div>
                     <div class="space-y-2">
-                      <div class="text-[11px] font-bold text-slate-500">교과목 (국가교육과정 성취기준 반영 · 종이 없이 머리로 푸는 형태)</div>
+                      <div class="text-[.6875rem] font-bold text-slate-500">교과목 (국가교육과정 성취기준 반영 · 종이 없이 머리로 푸는 형태)</div>
                       <div class="flex flex-wrap gap-2">
                         ${CATEGORY_GROUPS.curriculum.map(cat => {
                           const active = c.selectedCategories.includes(cat);
@@ -2001,7 +2006,7 @@
               <div class="space-y-3 pb-4 border-b border-slate-200">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <label class="text-xs font-black text-slate-700">퀴즈 세트 제목 (웹에서 바로 수정 가능)</label>
-                  <span class="text-[11px] font-bold text-slate-500">총 ${c.draftQuestions.length}문항 (본 문제 ${c.draftQuestions.filter(x => x.stage !== 'revival').length} · 패자부활전 ${c.draftQuestions.filter(x => x.stage === 'revival').length})</span>
+                  <span class="text-[.6875rem] font-bold text-slate-500">총 ${c.draftQuestions.length}문항 (본 문제 ${c.draftQuestions.filter(x => x.stage !== 'revival').length} · 패자부활전 ${c.draftQuestions.filter(x => x.stage === 'revival').length})</span>
                 </div>
                 <div class="flex flex-col lg:flex-row items-stretch gap-2.5">
                   <input type="text" value="${escapeHtml(c.title)}" oninput="state.creator.title=this.value" class="flex-1 h-11 px-4 rounded-xl border border-slate-300 text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -2026,8 +2031,8 @@
                           </span>
                           <!-- 본 문제 / 패자부활전 구분 선택 버튼 -->
                           <div class="inline-flex rounded-xl bg-white p-0.5 border border-slate-300">
-                            <button onclick="updateDraftQuestionField(${idx}, 'stage', 'main')" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition ${!isRevival ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}">본 문제</button>
-                            <button onclick="updateDraftQuestionField(${idx}, 'stage', 'revival')" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition ${isRevival ? 'bg-rose-600 text-white' : 'text-slate-600 hover:bg-rose-50'}">🔥 패자부활전</button>
+                            <button onclick="updateDraftQuestionField(${idx}, 'stage', 'main')" class="px-2.5 py-1 rounded-lg text-[.6875rem] font-extrabold transition ${!isRevival ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}">본 문제</button>
+                            <button onclick="updateDraftQuestionField(${idx}, 'stage', 'revival')" class="px-2.5 py-1 rounded-lg text-[.6875rem] font-extrabold transition ${isRevival ? 'bg-rose-600 text-white' : 'text-slate-600 hover:bg-rose-50'}">🔥 패자부활전</button>
                           </div>
                         </div>
                         <button onclick="removeDraftQuestion(${idx})" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-rose-200 text-xs font-extrabold text-rose-600">삭제</button>
@@ -2038,7 +2043,7 @@
                           <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border ${q.answerIndex === oIdx ? 'border-emerald-500 ring-1 ring-emerald-200' : 'border-slate-200'}">
                             <input type="radio" name="ans_${idx}" ${q.answerIndex === oIdx ? 'checked' : ''} onchange="updateDraftQuestionField(${idx}, 'answerIndex', ${oIdx})" />
                             <input type="text" value="${escapeHtml(opt)}" oninput="updateDraftQuestionField(${idx}, 'option_${oIdx}', this.value)" class="min-w-0 flex-1 text-xs font-bold focus:outline-none" />
-                            ${q.answerIndex === oIdx ? '<span class="text-[10px] font-black text-emerald-600">정답</span>' : ''}
+                            ${q.answerIndex === oIdx ? '<span class="text-[.625rem] font-black text-emerald-600">정답</span>' : ''}
                           </div>
                         `).join('')}
                       </div>
@@ -2076,7 +2081,7 @@
           <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm settings-tabs gap-1.5">
             <button onclick="switchSettingsTab('theme')" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-1.5 ${tab === 'theme' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
               <span>🎨 디자인 테마</span>
-              <span class="hidden sm:inline text-[11px] opacity-85">(${activeTheme.name})</span>
+              <span class="hidden sm:inline text-[.6875rem] opacity-85">(${activeTheme.name})</span>
             </button>
             <button onclick="switchSettingsTab('rules')" class="h-11 px-3 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-1.5 ${tab === 'rules' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100'}">
               <span>🏆 게임 진행·생존 규칙</span>
@@ -2099,12 +2104,12 @@
                   return `
                     <button onclick="updateGamePref('theme', '${th.id}'); showToast('${th.name} 테마 및 전용 폰트가 즉시 적용되었습니다.', 'success');" class="p-5 rounded-2xl border-2 text-left transition flex flex-col justify-between gap-3 ${selected ? 'border-blue-600 bg-blue-500/15 ring-2 ring-blue-300 shadow-sm' : 'border-slate-300/60 bg-slate-500/5 hover:bg-slate-500/10'}">
                       <div class="flex items-center justify-between gap-2">
-                        <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-black">${th.badge}</span>
-                        ${selected ? '<span class="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[11px] font-black">✓ 현재 적용됨</span>' : ''}
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[.6875rem] font-black">${th.badge}</span>
+                        ${selected ? '<span class="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[.6875rem] font-black">✓ 현재 적용됨</span>' : ''}
                       </div>
                       <div>
                         <div class="text-base font-black">${th.name} <span class="text-xs font-bold opacity-60">(${th.en})</span></div>
-                        <div class="text-[11px] font-extrabold text-blue-600 mt-0.5">적용 폰트: ${th.fontName}</div>
+                        <div class="text-[.6875rem] font-extrabold text-blue-600 mt-0.5">적용 폰트: ${th.fontName}</div>
                         <p class="text-xs opacity-80 mt-1">${th.desc}</p>
                       </div>
                       <div class="flex gap-1.5 pt-1">
@@ -2135,7 +2140,7 @@
                       return `
                         <button onclick="updateGamePref('targetSurvivors', ${opt.val})" class="p-3 rounded-2xl border-2 text-left transition ${active ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'}">
                           <div class="text-xs font-black">${opt.label}</div>
-                          <div class="text-[10px] mt-0.5 ${active ? 'text-slate-900 font-bold' : 'text-slate-500'}">${opt.sub}</div>
+                          <div class="text-[.625rem] mt-0.5 ${active ? 'text-slate-900 font-bold' : 'text-slate-500'}">${opt.sub}</div>
                         </button>
                       `;
                     }).join('')}
@@ -2200,11 +2205,11 @@
                       <div onclick="updateGamePref('allEliminatedRule', '${rule.id}')" class="cursor-pointer p-4 rounded-2xl border-2 transition space-y-2.5 ${active ? 'border-rose-600 bg-rose-50/50 shadow-sm' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}">
                         <div class="flex items-center justify-between">
                           <span class="text-xs font-black ${active ? 'text-rose-700' : 'text-slate-900'}">${rule.num} ${rule.title}</span>
-                          ${active ? '<span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black">선택됨</span>' : ''}
+                          ${active ? '<span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[.625rem] font-black">선택됨</span>' : ''}
                         </div>
-                        <p class="text-[11px] text-slate-600 leading-relaxed">${rule.desc}</p>
+                        <p class="text-[.6875rem] text-slate-600 leading-relaxed">${rule.desc}</p>
                         <div onclick="event.stopPropagation()">
-                          <label class="text-[10px] font-extrabold text-slate-500 block mb-1">학생 화면 대형 안내 문구</label>
+                          <label class="text-[.625rem] font-extrabold text-slate-500 block mb-1">학생 화면 대형 안내 문구</label>
                           <textarea rows="2" oninput="updateGamePref('${rule.msgKey}', this.value, false)" class="w-full p-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500">${escapeHtml(g[rule.msgKey])}</textarea>
                         </div>
                       </div>
@@ -2221,7 +2226,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <div class="text-sm font-black">실시간 카메라 · 구역 인식 미리보기</div>
-                    <p class="text-[11px] opacity-75">카메라를 켜면 실제 얼굴을 인식해 머리 위에 뱃지를 띄우고, 끄면 가상 학생으로 테스트합니다.</p>
+                    <p class="text-[.6875rem] opacity-75">카메라를 켜면 실제 얼굴을 인식해 머리 위에 뱃지를 띄우고, 끄면 가상 학생으로 테스트합니다.</p>
                   </div>
                   <div class="camera-toolbar">
                     <button onclick="state.settingsPreviewMode='OX'; render(); initSettingsCameraPreview();" class="h-8 px-3 rounded-xl text-xs font-extrabold border ${state.settingsPreviewMode === 'OX' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 text-slate-700 border-slate-200'}">OX 구역</button>
@@ -2239,14 +2244,14 @@
                   <!-- 설정 화면에서도 위치 및 투명도를 즉시 조정해볼 수 있는 교사 조작 리모컨 미리보기 -->
                   <div
                     id="settings-hud-preview"
-                    style="${(g.hudX !== null && g.hudY !== null) ? `left:min(${g.hudX}px, max(8px, calc(100% - 243px))); top:min(${g.hudY}px, calc(100% - 116px));` : 'right:12px; bottom:12px;'} opacity:${g.hudOpacity};"
-                    class="camera-preview-hud absolute z-20 w-[235px] rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/25 text-white shadow-xl p-2.5 space-y-2"
+                    style="${(g.hudX !== null && g.hudY !== null) ? `left:min(${g.hudX}px, max(8px, calc(100% - 14.6875rem - 8px))); top:min(${g.hudY}px, max(8px, calc(100% - 7.25rem)));` : 'right:12px; bottom:12px;'} opacity:${g.hudOpacity};"
+                    class="camera-preview-hud absolute z-20 rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/25 text-white shadow-xl p-2.5 space-y-2"
                   >
                     <div id="settings-hud-drag-handle" class="cursor-move flex items-center justify-between gap-1 pb-1.5 border-b border-white/15">
-                      <span class="text-[10px] font-black text-amber-300">⠿ 교사 조작 리모컨 (드래그)</span>
-                      <span id="settings-hud-opacity-text" class="text-[10px] font-bold text-slate-300">${Math.round(g.hudOpacity * 100)}%</span>
+                      <span class="text-[.625rem] font-black text-amber-300">⠿ 교사 조작 리모컨 (드래그)</span>
+                      <span id="settings-hud-opacity-text" class="text-[.625rem] font-bold text-slate-300">${Math.round(g.hudOpacity * 100)}%</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-1 text-[10px] font-extrabold">
+                    <div class="grid grid-cols-2 gap-1 text-[.625rem] font-extrabold">
                       <div class="h-7 rounded-lg bg-blue-600 flex items-center justify-center">▶ 문제 제시</div>
                       <div class="h-7 rounded-lg bg-slate-800 flex items-center justify-center">⏸ 일시정지</div>
                       <div class="h-7 rounded-lg bg-emerald-600 flex items-center justify-center">✓ 정답 공개</div>
@@ -2255,10 +2260,10 @@
                   </div>
 
                   <div class="absolute bottom-2.5 left-2.5 right-[min(15.5rem,48%)] camera-preview-toolbar flex items-center justify-between pointer-events-none">
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/75 text-white text-[10px] font-bold">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/75 text-white text-[.625rem] font-bold">
                       ${g.cameraActive ? '실제 카메라 인물 머리 위 뱃지 실시간 인식 중' : '가상 학생 드래그로 구역·경계선(주황)·이탈(깜빡임) 확인'}
                     </span>
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/75 text-amber-300 text-[10px] font-bold camera-preview-label">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/75 text-amber-300 text-[.625rem] font-bold camera-preview-label">
                       ${g.cameraActive ? '● 웹캠 LIVE' : '● 시뮬레이터'}
                     </span>
                   </div>
@@ -2274,11 +2279,11 @@
                   <div class="grid grid-cols-2 gap-2">
                     <button onclick="updateGamePref('choice4Layout', 'horizontal', false); state.settingsPreviewMode='4CHOICE'; render(); initSettingsCameraPreview();" class="p-2.5 rounded-xl border-2 text-left transition ${g.choice4Layout === 'horizontal' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-800 border-slate-200'}">
                       <div class="text-xs font-black">가로 4구역 (1×4)</div>
-                      <div class="text-[10px] opacity-85">좌에서 우로 1·2·3·4번</div>
+                      <div class="text-[.625rem] opacity-85">좌에서 우로 1·2·3·4번</div>
                     </button>
                     <button onclick="updateGamePref('choice4Layout', 'grid2x2', false); state.settingsPreviewMode='4CHOICE'; render(); initSettingsCameraPreview();" class="p-2.5 rounded-xl border-2 text-left transition ${g.choice4Layout === 'grid2x2' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-800 border-slate-200'}">
                       <div class="text-xs font-black">사분면 배치 (2×2)</div>
-                      <div class="text-[10px] opacity-85">상하좌우 4칸 구역</div>
+                      <div class="text-[.625rem] opacity-85">상하좌우 4칸 구역</div>
                     </button>
                   </div>
                 </div>
@@ -2289,7 +2294,7 @@
                     <span class="text-blue-600" data-slider-value>${formatSliderValue('boundaryWidthRatio', g.boundaryWidthRatio)}</span>
                   </div>
                   <input type="range" min="0.015" max="0.08" step="0.005" value="${g.boundaryWidthRatio}" data-setting="boundaryWidthRatio" aria-label="정답 구역 경계선 두께" oninput="updateSettingsSlider(this)" class="w-full" />
-                  <div class="text-[11px] opacity-75">현재 경계선 폭: <strong data-slider-value>${formatSliderValue('boundaryWidthRatio', g.boundaryWidthRatio)}</strong></div>
+                  <div class="text-[.6875rem] opacity-75">현재 경계선 폭: <strong data-slider-value>${formatSliderValue('boundaryWidthRatio', g.boundaryWidthRatio)}</strong></div>
                 </div>
 
                 <div class="space-y-1 pt-2 border-t border-slate-200/70">
@@ -2567,7 +2572,7 @@
               class="absolute z-30 w-[184px] max-w-[95%] rounded-2xl bg-slate-950/90 backdrop-blur-md border border-white/20 text-white shadow-2xl p-1.5 space-y-1"
             >
               <div id="teacher-hud-drag-handle" class="cursor-move flex items-center justify-between gap-1 pb-1 border-b border-white/15">
-                <span class="text-[11px] font-black text-amber-300 flex items-center gap-1">
+                <span class="text-[.6875rem] font-black text-amber-300 flex items-center gap-1">
                   ⠿ 조작 리모컨
                 </span>
                 <div class="flex items-center gap-1.5" onpointerdown="event.stopPropagation()">
@@ -2585,26 +2590,26 @@
               </div>
 
               <div class="grid grid-cols-2 gap-1.5">
-                <button onclick="runGameControl('present')" class="h-7 px-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('present')" class="h-7 px-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[.6875rem] font-extrabold flex items-center justify-center whitespace-nowrap">
                   ▶ 문제 제시
                 </button>
-                <button onclick="runGameControl('pause')" class="h-7 px-1 rounded-lg ${g.paused ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 hover:bg-slate-700 text-white'} text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('pause')" class="h-7 px-1 rounded-lg ${g.paused ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 hover:bg-slate-700 text-white'} text-[.6875rem] font-extrabold flex items-center justify-center whitespace-nowrap">
                   ${g.paused ? '▶ 재개' : '⏸ 일시정지'}
                 </button>
-                <button onclick="runGameControl('reveal')" class="h-7 px-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('reveal')" class="h-7 px-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[.6875rem] font-extrabold flex items-center justify-center whitespace-nowrap">
                   ✓ 정답 공개
                 </button>
-                <button onclick="runGameControl('next')" class="h-7 px-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-extrabold flex items-center justify-center whitespace-nowrap">
+                <button onclick="runGameControl('next')" class="h-7 px-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[.6875rem] font-extrabold flex items-center justify-center whitespace-nowrap">
                   다음 문제 →
                 </button>
               </div>
 
-              <button onclick="state.game.showLiveSettings=!state.game.showLiveSettings; render(); initCameraAndGameLoop();" class="w-full h-6 rounded-lg bg-white/10 hover:bg-white/15 text-[11px] font-extrabold text-slate-200 flex items-center justify-center">
+              <button onclick="state.game.showLiveSettings=!state.game.showLiveSettings; render(); initCameraAndGameLoop();" class="w-full h-6 rounded-lg bg-white/10 hover:bg-white/15 text-[.6875rem] font-extrabold text-slate-200 flex items-center justify-center">
                 ⚙ 진행 설정 ${g.showLiveSettings ? '▲' : '▼'}
               </button>
 
               ${g.showLiveSettings ? `
-                <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-2 text-[11px]">
+                <div class="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-2 text-[.6875rem]">
                   <div class="flex items-center justify-between gap-2">
                     <span class="text-slate-300 font-bold">풀이 시간</span>
                     <div class="flex items-center gap-1">
@@ -2691,7 +2696,7 @@
       unlockGameAudio();
       const url = new URL(window.location.href);
       url.searchParams.set('view', 'student');
-      url.searchParams.set('ui', '1.2.2');
+      url.searchParams.set('ui', '1.2.3');
       const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
       if (!popup) {
         showToast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.', 'warning');
