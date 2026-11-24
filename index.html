@@ -124,7 +124,16 @@
       line-height:1.2;
     }
     body.theme-pokemon :is(.font-medium, .font-semibold) { font-weight:700; }
+    body.theme-roblox .theme-display-title { letter-spacing:.015em; }
+    body.theme-pokemon .theme-display-title { letter-spacing:.025em; }
     body.theme-cyber .theme-display-title { letter-spacing:.045em; }
+    body.theme-classic .theme-display-title { letter-spacing:.01em; }
+    body .theme-display-title[data-font-theme] { letter-spacing:var(--sample-letter-spacing, .025em); }
+    body .theme-display-title[data-font-theme="roblox"] { --sample-letter-spacing:.015em; }
+    body .theme-display-title[data-font-theme="cyber"] { --sample-letter-spacing:.045em; }
+    body .theme-display-title[data-font-theme="classic"] { --sample-letter-spacing:.01em; }
+    .theme-card-name { font-size:1.25rem; overflow-wrap:anywhere; }
+    .theme-card-english { display:block; margin-top:.2rem; }
     :is(#main-navbar, #modal-root, #toast-container, #app-main > .page-shell:not(.play-layout))
       :is([class~="text-[.625rem]"], [class~="text-[.6875rem]"]) {
       font-size:.75rem;
@@ -282,10 +291,10 @@
           </div>
         </button>
 
-        <!-- 기리공작소 v1.2.5 고정 저작권 마크 -->
+        <!-- 기리공작소 v1.2.6 고정 저작권 마크 -->
         <div
           id="author-badge"
-          title="제작: 기리공작소 (Move & Quiz v1.2.5)"
+          title="제작: 기리공작소 (Move & Quiz v1.2.6)"
           class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 select-none"
         >
           <div id="author-avatar-box" class="w-6 h-6 rounded-full bg-white border border-slate-300 overflow-hidden flex items-center justify-center shrink-0">
@@ -297,7 +306,7 @@
             />
           </div>
           <span class="text-xs font-extrabold text-slate-700 whitespace-nowrap">기리공작소</span>
-          <span class="text-[.6875rem] font-bold text-slate-500 whitespace-nowrap">v1.2.5</span>
+          <span class="text-[.6875rem] font-bold text-slate-500 whitespace-nowrap">v1.2.6</span>
         </div>
       </div>
 
@@ -1772,7 +1781,7 @@
         <div class="page-shell py-5 sm:py-8 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-2xl font-black text-slate-900">퀴즈 보관함</h2>
+              <h2 class="text-2xl sm:text-3xl theme-display-title text-slate-900">퀴즈 보관함</h2>
               <p class="text-xs text-slate-500 mt-0.5">저장된 퀴즈를 선택해 수업에 활용하거나 문항 수정·Google Drive 연동을 진행하세요.</p>
             </div>
             <div class="layout-actions">
@@ -1835,7 +1844,7 @@
         <div class="page-shell py-5 sm:py-8 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-2xl font-black text-slate-900">퀴즈 만들기</h2>
+              <h2 class="text-2xl sm:text-3xl theme-display-title text-slate-900">퀴즈 만들기</h2>
               <p class="text-xs text-slate-500 mt-0.5">출제 방식을 먼저 선택한 뒤 세부 조건을 설정해 주세요.</p>
             </div>
             ${!state.auth.isLoggedIn && c.mainMode === 'ai' ? `
@@ -2102,7 +2111,7 @@
         <div class="page-shell settings-panel py-5 sm:py-8 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-2xl font-black text-slate-900">게임·카메라 및 수업 규칙 설정</h2>
+              <h2 class="text-2xl sm:text-3xl theme-display-title text-slate-900">게임·카메라 및 수업 규칙 설정</h2>
               <p class="text-xs text-slate-500 mt-0.5">모든 설정은 <strong>${escapeHtml(accountLabel)}</strong> 계정에 자동 저장되어 다음 접속 시에도 유지됩니다.</p>
             </div>
             <button onclick="Object.assign(state.game, JSON.parse(JSON.stringify(DEFAULT_USER_PREFS))); saveUserGamePrefs(); render(); if(state.settingsTab==='camera') initSettingsCameraPreview(); showToast('기본 설정으로 초기화되었습니다.', 'info');" class="h-10 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-extrabold">
@@ -2128,7 +2137,7 @@
             <!-- 탭 1: 학생 선호 맞춤형 디자인 테마 -->
             <div class="rounded-3xl p-6 border shadow-sm space-y-5 ${activeTheme.panelClass}">
               <div>
-                <h3 class="text-base font-black">학생 선호 맞춤형 디자인 테마 선택</h3>
+                <h3 class="text-xl sm:text-2xl theme-display-title">학생 선호 맞춤형 디자인 테마 선택</h3>
                 <p class="text-xs opacity-75 mt-0.5">테마를 선택하면 제목과 본문 글꼴, 색상, 배경이 바뀝니다.</p>
               </div>
               <div class="fluid-columns gap-4">
@@ -2141,7 +2150,10 @@
                         ${selected ? '<span class="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[.6875rem] font-black">✓ 현재 적용됨</span>' : ''}
                       </div>
                       <div>
-                        <div class="text-base font-bold leading-snug">${th.name} <span class="theme-card-english text-xs font-semibold">(${th.en})</span></div>
+                        <div>
+                          <div class="theme-display-title theme-card-name" data-font-theme="${th.id}" style='--display-font:"${th.displayFont}"'>${th.name}</div>
+                          <span class="theme-card-english text-xs font-semibold">(${th.en})</span>
+                        </div>
                         <div class="text-xs font-semibold text-blue-600 mt-1">제목 · ${th.displayFont}<br>본문 · ${th.readingFont}</div>
                         <p class="text-xs theme-card-copy mt-1">${th.desc}</p>
                       </div>
@@ -2568,7 +2580,7 @@
             <section class="teacher-answer rounded-3xl border border-emerald-200 bg-slate-950 px-6 py-12 text-white">
               <p class="text-base font-extrabold text-emerald-300">교사용 정답</p>
               <strong class="mt-4 block text-emerald-200">${q.type === 'OX' ? '' : `${q.answerIndex + 1}번 · `}${escapeHtml(q.options[q.answerIndex])}</strong>
-              <h2 class="mt-6 text-xl font-black">${escapeHtml(q.question)}</h2>
+              <h2 class="mt-6 text-xl sm:text-2xl theme-display-title">${escapeHtml(q.question)}</h2>
               ${q.explanation ? `<p class="mt-4 text-base text-slate-200">${escapeHtml(q.explanation)}</p>` : ''}
             </section>
           ` : `
@@ -2579,7 +2591,7 @@
             ${!isSpecial && !isRevealed ? `
               <div class="stage-question-band">
                 <div id="stage-question" tabindex="0" class="stage-question font-black ${phase === 'answering' ? 'is-moving' : ''}">
-                  ${phase === 'ready' ? '문제 제시를 기다려 주세요.' : escapeHtml(q.question)}
+                  <h2 class="theme-display-title">${phase === 'ready' ? '문제 제시를 기다려 주세요.' : escapeHtml(q.question)}</h2>
                   ${phase !== 'ready' && q.type !== 'OX' ? `
                     <ol class="mt-1.5 stage-options gap-x-4 gap-y-0.5 text-left text-[.62em]">${q.options.map((option, index) => `<li>${index + 1}. ${escapeHtml(option)}</li>`).join('')}</ol>
                   ` : ''}
@@ -2729,7 +2741,7 @@
       unlockGameAudio();
       const url = new URL(window.location.href);
       url.searchParams.set('view', 'student');
-      url.searchParams.set('ui', '1.2.5');
+      url.searchParams.set('ui', '1.2.6');
       const popup = window.open(url.toString(), 'MoveAndQuizStudentWindow', 'width=1280,height=800');
       if (!popup) {
         showToast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.', 'warning');
